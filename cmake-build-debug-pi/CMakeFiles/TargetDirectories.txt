@@ -1,0 +1,3 @@
+/home/alexa/brick_pi_clion/cmake-build-debug-pi/CMakeFiles/brick_pi_clion.dir
+/home/alexa/brick_pi_clion/cmake-build-debug-pi/CMakeFiles/edit_cache.dir
+/home/alexa/brick_pi_clion/cmake-build-debug-pi/CMakeFiles/rebuild_cache.dir

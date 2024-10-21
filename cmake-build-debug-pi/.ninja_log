@@ -1,0 +1,13 @@
+# ninja log v6
+1	239	1729509896451699469	CMakeFiles/brick_pi_clion.dir/common.cpp.o	7c5b6708bf6cc9f6
+1	21	1729510349417633441	build.ninja	7136cf6be5c6adcd
+1	363	1729509772441055677	CMakeFiles/brick_pi_clion.dir/Motor/motor.cpp.o	e5e16abfbd179d70
+2	416	1729509815512605082	CMakeFiles/brick_pi_clion.dir/Movement/wheelsMovement.cpp.o	483e4254cc5b74ff
+1	467	1729509927579332692	CMakeFiles/brick_pi_clion.dir/main.cpp.o	5c8b12ae361600fe
+1	67	1729509772441055677	CMakeFiles/brick_pi_clion.dir/brickpi/spi.cpp.o	64a447dbec030567
+1	17	1729509896451699469	CMakeFiles/brick_pi_clion.dir/Resource.cpp.o	4d3405e9008df71b
+1	122	1729509772441055677	CMakeFiles/brick_pi_clion.dir/brickpi/BrickPi3.cpp.o	96b0340ff854668a
+2	423	1729509815512605082	CMakeFiles/brick_pi_clion.dir/Movement/rotation.cpp.o	d7e6eb1905d74bc2
+3	402	1729509815512605082	CMakeFiles/brick_pi_clion.dir/Sensors/getSensorData.cpp.o	bdbf45f57e30a52a
+2	420	1729509815512605082	CMakeFiles/brick_pi_clion.dir/PID/PID.cpp.o	c51d41a2ee3bcbdd
+467	550	1729509928047327107	brick_pi_clion	8eaa50237bba64de
