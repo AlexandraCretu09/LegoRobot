@@ -22,7 +22,7 @@ class Motor{
 		void setLeftWheelDPS(int degrees, BrickPi3 BP);
 		MotorDetails getRightMotorStatus(BrickPi3 BP);
 		MotorDetails getLeftMotorStatus(BrickPi3 BP);
-		void resetMotorEncoder(BrickPi3 BP);
+		void resetBothMotorEncoders(BrickPi3 BP);
 
 };
 

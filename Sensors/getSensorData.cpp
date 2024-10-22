@@ -14,7 +14,7 @@
 
 using namespace std;
 
-extern mutex bpMutex;
+
 
 int Sensor::getPortNumber(int x){
 	switch(x){
@@ -60,12 +60,12 @@ bool Sensor::killButton(BrickPi3 &BP){
 	return false;
 }
 
-int16_t Sensor::returnGyroValue(BrickPi3 BP){
+sensor_gyro_t Sensor::returnGyroValue(BrickPi3 BP){
 	sensor_gyro_t Gyro;
 
 	lock_guard<mutex> lock(bpMutex);
-	if(!BP.get_sensor(PORT_2, &Gyro)){
-		return Gyro.abs;
+	if(!BP.get_sensor(PORT_1, &Gyro)){
+		return Gyro;
 	}
 }
 

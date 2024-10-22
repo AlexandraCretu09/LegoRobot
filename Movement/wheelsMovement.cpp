@@ -12,17 +12,18 @@
 
 #include <iostream>
 #include <unistd.h>
-
+#include <ctime>
 
 #include "BrickPi3.h"
 #include "../Motor/motor.h"
+#include "../Sensors/getSensorData.h"
 
 using namespace std;
 
+//float second1 = 1000000.0;
+
+
 float second1 = 1000000.0;
-
-
-
 void WheelsMovement::goForward(float noOfSeconds, BrickPi3 BP){
 
 	float time = noOfSeconds * second1;
@@ -75,9 +76,6 @@ void WheelsMovement::stop(BrickPi3 BP){
 	motor.setRightWheelDPS(0, BP);
 }
 
-void WheelsMovement::checkIfStopped(BrickPi3 BP){
-	Motor motor;
-}
 
 
 

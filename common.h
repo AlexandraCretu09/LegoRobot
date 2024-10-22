@@ -13,6 +13,7 @@
 
 extern std::mutex bpMutex;
 
+
 struct MotorDetails{
 	uint8_t State;
 	int8_t Power;
