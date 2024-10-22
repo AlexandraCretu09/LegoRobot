@@ -13,9 +13,10 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
-#include <pthread.h>
+
 
 #include "common.h"
+#include "MonitorGyroscope/GyroMonitor.h"
 
 #include "Sensors/getSensorData.h"
 #include "Motor/motor.h"
@@ -27,11 +28,11 @@ using namespace std;
 
 extern mutex bpMutex;
 
-float second = 1000000.0;
-bool ok = false;
 
+bool ok = false;
+float second = 1000000.0;
 void monitorKillButton(Sensor& button, atomic<bool>& stopFlag, BrickPi3 &BP){
-	while(!stopFlag){
+	while(!stopFlag.load()){
 		if(button.killButton(BP)){
 			printf("Button pressed.\n");
 			stopFlag = true;
@@ -40,35 +41,47 @@ void monitorKillButton(Sensor& button, atomic<bool>& stopFlag, BrickPi3 &BP){
 	}
 }
 
-void testRobot(atomic<bool> &stopFlag,BrickPi3 BP){
+// void monitorGyroscope(atomic<bool>& stopFlag, BrickPi3 &BP) {
+// 	Sensor sensor;
+// 	while(!stopFlag.load()) {
+//
+// 		sensor_gyro_t gyroValues = sensor.returnGyroValue(BP);
+// 		printf("Abs: %d\n", gyroValues.abs);
+// 	}
+// }
 
+void testRobot(atomic<bool> &stopFlag,BrickPi3 BP) {
 	WheelsMovement move;
 	Rotation rotate;//
 	Motor motor;
 	Sensor sensor;
 
-	MotorDetails rightMotorDetails, leftMotorDetails;
-	sensor_gyro_t gyroValues;
+	printf("Reset encoders\n");
+	motor.resetBothMotorEncoders(BP);
 
 	int ct = 1;
-	/*
-	while(!stopFlag){
-		gyroValues = sensor.returnGyroValue(BP);
-		printf("Abs: %d\n", gyroValues.abs);
-		//printf("DPS: %d\n", gyroValues.dps)
-		usleep(second/2);
-	}*/
+	GyroMonitor gyroMonitor(stopFlag, BP);
+	printf("Created gyroMonitor value\n");
+	while(!stopFlag.load()) {
+		//printf("Entered stopFlag loop in main\n");
+		if(ct) {
 
-	{
-		lock_guard<mutex> lock(bpMutex);
-		BP.reset_all();
+			move.goForward(BP);
+			printf("Robot going forward\n");
+			gyroMonitor.startMonitoring();
+			printf("Started monitoring\n");
+			ct = 0;
+		}
 	}
-	stopFlag = true;
+	move.stop(BP);
+	gyroMonitor.stopMonitoring();
 
+	move.stop(BP);
 
-
-
+	stopFlag.store(true);
 }
+
+
 
 // 55 - diametrul pe dreapta
 
@@ -103,24 +116,24 @@ int main(void)
 	printf("9v voltage      : %.3f\n", BP.get_voltage_9v());
 	printf("5v voltage      : %.3f\n", BP.get_voltage_5v());
 	printf("3.3v voltage    : %.3f\n", BP.get_voltage_3v3());
-	return 0;
-	BP.set_sensor_type(PORT_1, SENSOR_TYPE_NXT_ULTRASONIC); // forward
+
+
 	BP.set_sensor_type(PORT_4, SENSOR_TYPE_NXT_ULTRASONIC); // left
 	BP.set_sensor_type(PORT_3, SENSOR_TYPE_NXT_ULTRASONIC); // right
-	BP.set_sensor_type(PORT_2, SENSOR_TYPE_EV3_GYRO_ABS_DPS); //
+	BP.set_sensor_type(PORT_1, SENSOR_TYPE_EV3_GYRO_ABS_DPS); //
+	BP.set_sensor_type(PORT_2, SENSOR_TYPE_TOUCH); //
 
 
 
 	atomic<bool> stopFlag(false);
 
 	Sensor button;
-	//thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
-
+	thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
 
 
 	testRobot(stopFlag, BP);
 
-	//killMonitorThread.join();
+	killMonitorThread.join();
 
 	printf("Program exiting.\n");
 	return 0;

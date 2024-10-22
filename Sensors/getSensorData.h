@@ -16,7 +16,7 @@ class Sensor{
 		int getPortNumber(int x);
 		float returnUltrasonicValue(int x,  BrickPi3 BP);
 		bool killButton(BrickPi3 &BP);
-		int16_t returnGyroValue(BrickPi3 BP);
+		sensor_gyro_t returnGyroValue(BrickPi3 BP);
 
 };
 
