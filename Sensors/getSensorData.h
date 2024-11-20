@@ -13,11 +13,13 @@
 
 class Sensor{
 	public:
+		Sensor(BrickPi3 &BP);
 		int getPortNumber(int x);
-		float returnUltrasonicValue(int x,  BrickPi3 BP);
-		bool killButton(BrickPi3 &BP);
-		sensor_gyro_t returnGyroValue(BrickPi3 BP);
-
+		float returnUltrasonicValue(int x);
+		bool killButton();
+		sensor_gyro_t returnGyroValue();
+private:
+	BrickPi3 &BP;
 };
 
 #endif /* GETSENSORDATA_H_ */

@@ -14,6 +14,7 @@
 
 using namespace std;
 
+Sensor::Sensor(BrickPi3 &BP) : BP(BP) {}
 
 
 int Sensor::getPortNumber(int x){
@@ -33,7 +34,7 @@ int Sensor::getPortNumber(int x){
 }
 
 
-float Sensor::returnUltrasonicValue(int x,  BrickPi3 BP){
+float Sensor::returnUltrasonicValue(int x){
 
 	int PORT = getPortNumber(x);
 
@@ -49,7 +50,7 @@ float Sensor::returnUltrasonicValue(int x,  BrickPi3 BP){
 	return NULL;
 }
 
-bool Sensor::killButton(BrickPi3 &BP){
+bool Sensor::killButton(){
 	sensor_touch_t Button;
 
 	lock_guard<mutex> lock(bpMutex);
@@ -60,7 +61,7 @@ bool Sensor::killButton(BrickPi3 &BP){
 	return false;
 }
 
-sensor_gyro_t Sensor::returnGyroValue(BrickPi3 BP){
+sensor_gyro_t Sensor::returnGyroValue(){
 	sensor_gyro_t Gyro;
 
 	lock_guard<mutex> lock(bpMutex);

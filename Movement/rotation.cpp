@@ -18,64 +18,67 @@
 
 using namespace std;
 
+Rotation::Rotation(BrickPi3 BP) : BP(BP) {}
 
 
-void Rotation::rotateLeft(atomic<bool> &stopFlag, BrickPi3 BP){
+void Rotation::rotateLeft(atomic<bool> &stopFlag){
 
 
-	Motor motor;
+	Motor motor(BP);
 	MotorDetails motorDetails = {0};
-	WheelsMovement move;
+	WheelsMovement move(BP);
 	bool ok = false;
 
-	motor.resetBothMotorEncoders(BP);
+	motor.resetBothMotorEncoders();
 
 	while((motorDetails.Position < 450)){
 		if(!ok){
-			move.moveRightWheel(200, BP);
-			move.moveLeftWheel(20, BP);
+			move.moveRightWheel(200);
+			move.moveLeftWheel(20);
 			ok = true;
 		}
-		Sensor sensor;
-		sensor_gyro_t gyroValues = sensor.returnGyroValue(BP);
-		printf("Abs: %d\n", gyroValues.abs);
+		Sensor sensor(BP);
+		sensor_gyro_t gyroValues = sensor.returnGyroValue();
+		// printf("Abs: %d\n", gyroValues.abs);
 
-		motorDetails = motor.getRightMotorStatus(BP);
+		motorDetails = motor.getRightMotorStatus();
 
 		if(stopFlag)
 			break;
 		}
-	move.stop(BP);
+	move.stop();
 }
 
 
-void Rotation::rotateRight(atomic<bool> &stopFlag, BrickPi3 BP){
+void Rotation::rotateRight(atomic<bool> &stopFlag){
 
 
-	Motor motor;
+	Motor motor(BP);
 	MotorDetails motorDetails = {0};
-	WheelsMovement move;
+	WheelsMovement move(BP);
 	bool ok = false;
 
-	motor.resetBothMotorEncoders(BP);
+	motor.resetBothMotorEncoders();
 
 	while((motorDetails.Position < 450)){
+		printf("Position: %d\n", motorDetails.Position);
 		if(!ok){
-			move.moveRightWheel(20, BP);
-			move.moveLeftWheel(200, BP);
+
+			move.moveRightWheel(20);
+			move.moveLeftWheel(200);
 			ok = true;
 		}
 
-		Sensor sensor;
-		sensor_gyro_t gyroValues = sensor.returnGyroValue(BP);
-		printf("Abs: %d\n", gyroValues.abs);
+		Sensor sensor(BP);
+		sensor_gyro_t gyroValues = sensor.returnGyroValue();
+		//printf("Abs: %d\n", gyroValues.abs);
 
-		motorDetails = motor.getLeftMotorStatus(BP);
+		motorDetails = motor.getLeftMotorStatus();
 		if(stopFlag)
 			break;
 
 		}
-	move.stop(BP);
+	move.stop();
 }
 
 

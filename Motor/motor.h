@@ -18,11 +18,14 @@ using namespace std;
 
 class Motor{
 	public:
-		void setRightWheelDPS(int degrees, BrickPi3 BP);
-		void setLeftWheelDPS(int degrees, BrickPi3 BP);
-		MotorDetails getRightMotorStatus(BrickPi3 BP);
-		MotorDetails getLeftMotorStatus(BrickPi3 BP);
-		void resetBothMotorEncoders(BrickPi3 BP);
+		Motor(BrickPi3 BP);
+		void setRightWheelDPS(int degrees);
+		void setLeftWheelDPS(int degrees);
+		MotorDetails getRightMotorStatus();
+		MotorDetails getLeftMotorStatus();
+		void resetBothMotorEncoders();
+	private:
+		BrickPi3 BP;
 
 };
 

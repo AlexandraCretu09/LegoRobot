@@ -17,20 +17,23 @@ using namespace std;
 
 extern mutex bpMutex;
 
+Motor::Motor(BrickPi3 BP) : BP(BP) {
+
+}
 
 
-void Motor::setRightWheelDPS(int degrees, BrickPi3 BP){
+void Motor::setRightWheelDPS(int degrees){
 	lock_guard<mutex> lock(bpMutex);
 	BP.set_motor_dps(PORT_A, degrees);
 }
 
-void Motor::setLeftWheelDPS(int degrees, BrickPi3 BP){
+void Motor::setLeftWheelDPS(int degrees){
 	lock_guard<mutex> lock(bpMutex);
-	BP.set_motor_dps(PORT_C, degrees);
+	BP.set_motor_dps(PORT_B, degrees);
 }
 
 
-MotorDetails Motor::getRightMotorStatus(BrickPi3 BP){
+MotorDetails Motor::getRightMotorStatus(){
 
 
 	MotorDetails motorDetails;
@@ -44,23 +47,23 @@ MotorDetails Motor::getRightMotorStatus(BrickPi3 BP){
 
 
 
-MotorDetails Motor::getLeftMotorStatus(BrickPi3 BP){
+MotorDetails Motor::getLeftMotorStatus(){
 
 	MotorDetails motorDetails;
 	//printf("Locked motor for status.\n");
 	lock_guard<mutex> lock(bpMutex);{
-		BP.get_motor_status(PORT_C, motorDetails.State, motorDetails.Power, motorDetails.Position, motorDetails.DPS);
-		BP.get_motor_encoder(PORT_C, motorDetails.Encoder);
+		BP.get_motor_status(PORT_B, motorDetails.State, motorDetails.Power, motorDetails.Position, motorDetails.DPS);
+		BP.get_motor_encoder(PORT_B, motorDetails.Encoder);
 	}
 	return motorDetails;
 }
 
 
 
-void Motor::resetBothMotorEncoders(BrickPi3 BP){
+void Motor::resetBothMotorEncoders(){
 	lock_guard<mutex> lock(bpMutex);
 	BP.reset_motor_encoder(PORT_A);
-	BP.reset_motor_encoder(PORT_C);
+	BP.reset_motor_encoder(PORT_B);
 }
 
 
