@@ -13,7 +13,17 @@
 
 class PID{
 public:
-	void correctPath(float noOfSeconds, std::atomic<bool>& stopFlag,  BrickPi3 BP);
+    PID(BrickPi3 BP);
+
+    bool correctPath(std::atomic<bool> &stopFlag);
+private:
+    BrickPi3 BP;
+    bool isTooCloseToLeft();
+    bool isTooCloseToRight();
+    void passTime(float seconds, std::atomic<bool>& stopFlag);
+    void antiCorrection(bool right, std::atomic<bool>& stopFlag);
+    void correctLeft(std::atomic<bool>& stopFlag);
+    void correctRight(std::atomic<bool>& stopFlag);
 };
 
 

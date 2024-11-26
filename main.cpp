@@ -33,7 +33,7 @@ bool ok = false;
 float second = 1000000.0;
 void monitorKillButton(Sensor& button, atomic<bool>& stopFlag, BrickPi3 &BP){
 	while(!stopFlag.load()){
-		if(button.killButton(BP)){
+		if(button.killButton()){
 			printf("Button pressed.\n");
 			stopFlag = true;
 		}
@@ -51,32 +51,39 @@ void monitorKillButton(Sensor& button, atomic<bool>& stopFlag, BrickPi3 &BP){
 // }
 
 void testRobot(atomic<bool> &stopFlag,BrickPi3 BP) {
-	WheelsMovement move;
-	Rotation rotate;//
-	Motor motor;
-	Sensor sensor;
+
+	Motor motor(BP);
+	WheelsMovement move(BP);
 
 	printf("Reset encoders\n");
-	motor.resetBothMotorEncoders(BP);
+	motor.resetBothMotorEncoders();
 
-	int ct = 1;
-	GyroMonitor gyroMonitor(stopFlag, BP);
-	printf("Created gyroMonitor value\n");
+	usleep(second);
+
 	while(!stopFlag.load()) {
-		//printf("Entered stopFlag loop in main\n");
-		if(ct) {
+		PID pid(BP);
+		if(pid.correctPath(stopFlag) == true) {
+			Rotation rotate(BP);
+			Sensor sensor(BP);
+			 if(sensor.returnUltrasonicValue(3) > 20) {
+				rotate.rotateRight(stopFlag);
+			 	break;
 
-			move.goForward(BP);
-			printf("Robot going forward\n");
-			gyroMonitor.startMonitoring();
-			printf("Started monitoring\n");
-			ct = 0;
+			}
 		}
-	}
-	move.stop(BP);
-	gyroMonitor.stopMonitoring();
 
-	move.stop(BP);
+
+
+	}
+
+	// while(!stopFlag.load()) {
+	// 	Sensor sensor(BP);
+	// 	printf("Left sensor: %f\n", sensor.returnUltrasonicValue(4));
+	// 	printf("Right sensor: %f\n\n", sensor.returnUltrasonicValue(3));
+	// 	usleep(second/5);
+	// }
+	move.stop();
+	//gyroMonitor.stopMonitoring();
 
 	stopFlag.store(true);
 }
@@ -127,7 +134,7 @@ int main(void)
 
 	atomic<bool> stopFlag(false);
 
-	Sensor button;
+	Sensor button(BP);
 	thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
 
 

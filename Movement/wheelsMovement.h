@@ -12,17 +12,20 @@
 
 class WheelsMovement{
 public:
-	void goForward(float noOfSeconds, BrickPi3 BP);
-	void goForward(BrickPi3 BP);
+	WheelsMovement(BrickPi3 &BP);
+	void goForward(float noOfSeconds);
+	void goForward();
 
-	void goBackwards(float noOfSeconds, BrickPi3 BP);
-	void goBackwards(BrickPi3 BP);
+	void goBackwards(float noOfSeconds);
+	void goBackwards();
 
-	void moveLeftWheel(float degrees, BrickPi3 BP);
-	void moveRightWheel(float degrees, BrickPi3 BP);
+	void moveLeftWheel(float degrees);
+	void moveRightWheel(float degrees);
 
-	void stop(BrickPi3 BP);
-	void checkIfStopped(BrickPi3 BP);
+	void stop();
+	void checkIfStopped();
+private:
+	BrickPi3 BP;
 
 };
 

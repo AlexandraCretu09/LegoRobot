@@ -20,9 +20,8 @@ GyroMonitor::GyroMonitor(atomic<bool>& stopFlag, BrickPi3& BP)
 }
 
 int GyroMonitor::getGyroscopeReading() {
-    Sensor sensor;
-    sensor_gyro_t gyroValues = sensor.returnGyroValue(BP);
-    //printf("Abs: %d\n", gyroValues.abs);
+    Sensor sensor(BP);
+    sensor_gyro_t gyroValues = sensor.returnGyroValue();
     return gyroValues.abs;
 }
 

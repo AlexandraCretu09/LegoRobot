@@ -24,56 +24,60 @@ using namespace std;
 
 
 float second1 = 1000000.0;
-void WheelsMovement::goForward(float noOfSeconds, BrickPi3 BP){
+
+WheelsMovement::WheelsMovement(BrickPi3 &BP) : BP(BP) {}
+
+
+void WheelsMovement::goForward(float noOfSeconds){
 
 	float time = noOfSeconds * second1;
-	Motor motor;
+	Motor motor(BP);
 
-	motor.setLeftWheelDPS(250, BP);
-	motor.setRightWheelDPS(250, BP);
+	motor.setLeftWheelDPS(250);
+	motor.setRightWheelDPS(250);
 	usleep(time);
 }
 
-void WheelsMovement::goForward(BrickPi3 BP){
-	Motor motor;
+void WheelsMovement::goForward(){
+	Motor motor(BP);
 
-	motor.setLeftWheelDPS(250, BP);
-	motor.setRightWheelDPS(250, BP);
+	motor.setLeftWheelDPS(250);
+	motor.setRightWheelDPS(250);
 }
 
-void WheelsMovement::goBackwards(float noOfSeconds, BrickPi3 BP){
+void WheelsMovement::goBackwards(float noOfSeconds){
 
 	float time = noOfSeconds * second1;
 
-	Motor motor;
+	Motor motor(BP);
 
-	motor.setLeftWheelDPS(-200, BP);
-	motor.setRightWheelDPS(-200, BP);
+	motor.setLeftWheelDPS(-200);
+	motor.setRightWheelDPS(-200);
 	usleep(time);
 }
 
-void WheelsMovement::goBackwards(BrickPi3 BP){
-	Motor motor;
+void WheelsMovement::goBackwards(){
+	Motor motor(BP);
 
-	motor.setLeftWheelDPS(-200, BP);
-	motor.setRightWheelDPS(-200, BP);
+	motor.setLeftWheelDPS(-200);
+	motor.setRightWheelDPS(-200);
 }
 
-void WheelsMovement::moveLeftWheel(float degrees, BrickPi3 BP){
-	Motor motor;
-	motor.setLeftWheelDPS(degrees, BP);
+void WheelsMovement::moveLeftWheel(float degrees){
+	Motor motor(BP);
+	motor.setLeftWheelDPS(degrees);
 }
 
-void WheelsMovement::moveRightWheel(float degrees, BrickPi3 BP){
-	Motor motor;
-	motor.setRightWheelDPS(degrees, BP);
+void WheelsMovement::moveRightWheel(float degrees){
+	Motor motor(BP);
+	motor.setRightWheelDPS(degrees);
 }
 
-void WheelsMovement::stop(BrickPi3 BP){
-	Motor motor;
+void WheelsMovement::stop(){
+	Motor motor(BP);
 
-	motor.setLeftWheelDPS(0, BP);
-	motor.setRightWheelDPS(0, BP);
+	motor.setLeftWheelDPS(0);
+	motor.setRightWheelDPS(0);
 }
 
 
