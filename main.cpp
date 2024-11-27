@@ -53,8 +53,13 @@ void monitorKillButton(Sensor& button, atomic<bool>& stopFlag, BrickPi3 &BP){
 
 void testRobot(atomic<bool> &stopFlag,BrickPi3 BP) {
 
+
+
 	Motor motor(BP);
 	WheelsMovement move(BP);
+
+	// move.stop();
+	// return;
 
 	printf("Reset encoders\n");
 	motor.resetBothMotorEncoders();
@@ -81,6 +86,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 BP) {
 				rotate.rotateLeft(stopFlag);
 			if(sensor.returnUltrasonicValue(3) > 20)
 				rotate.rotateRight(stopFlag);
+			checkerFlag.store(false);
 			ok = 1;
 		}
 		if(stopFlag.load()) {

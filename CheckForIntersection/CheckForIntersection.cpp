@@ -34,7 +34,7 @@ void CheckForIntersection::checker() {
             checkerFlag.store(true);
         }
         constexpr float second = 1000000.0;
-        usleep(second/2);
+        usleep(second/8);
     }
 }
 

@@ -17,7 +17,9 @@ public:
 	void goForward();
 
 	void goBackwards(float noOfSeconds);
+	void goBackwards(int Position);
 	void goBackwards();
+
 
 	void moveLeftWheel(float degrees);
 	void moveRightWheel(float degrees);

@@ -60,7 +60,7 @@ void PID::correctPath(atomic<bool> &stopFlag, atomic<bool> &checkerFlag){
 				}
 			}
 			constexpr float second = 1000000.0;
-			usleep(second/2);
+			usleep(second/4);
 		}
 	}
 
