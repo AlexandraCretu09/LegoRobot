@@ -25,9 +25,11 @@ void Rotation::rotateLeft(atomic<bool> &stopFlag){
 
 
 	Motor motor(BP);
-	MotorDetails motorDetails = {0};
+	MotorDetails motorDetails = {};
 	WheelsMovement move(BP);
 	bool ok = false;
+
+	move.goBackwards(-150);
 
 	motor.resetBothMotorEncoders();
 
@@ -46,6 +48,7 @@ void Rotation::rotateLeft(atomic<bool> &stopFlag){
 		if(stopFlag)
 			break;
 		}
+	move.goForward(1.5);
 	move.stop();
 }
 
@@ -58,10 +61,13 @@ void Rotation::rotateRight(atomic<bool> &stopFlag){
 	WheelsMovement move(BP);
 	bool ok = false;
 
+
+	move.goBackwards(-150);
+
 	motor.resetBothMotorEncoders();
 
 	while((motorDetails.Position < 450)){
-		printf("Position: %d\n", motorDetails.Position);
+		//printf("Position: %d\n", motorDetails.Position);
 		if(!ok){
 
 			move.moveRightWheel(20);
@@ -76,8 +82,8 @@ void Rotation::rotateRight(atomic<bool> &stopFlag){
 		motorDetails = motor.getLeftMotorStatus();
 		if(stopFlag)
 			break;
-
 		}
+	move.goForward(1.5);
 	move.stop();
 }
 

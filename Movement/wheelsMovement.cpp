@@ -73,6 +73,22 @@ void WheelsMovement::moveRightWheel(float degrees){
 	motor.setRightWheelDPS(degrees);
 }
 
+void WheelsMovement::goBackwards(int Position) {
+	Motor motor(BP);
+	MotorDetails motorDetails = {};
+
+	motor.resetBothMotorEncoders();
+	bool ok = true;
+	while(motorDetails.Position > Position) {
+		if(ok) {
+			goBackwards();
+			ok = false;
+		}
+		motorDetails = motor.getLeftMotorStatus();
+	}
+}
+
+
 void WheelsMovement::stop(){
 	Motor motor(BP);
 

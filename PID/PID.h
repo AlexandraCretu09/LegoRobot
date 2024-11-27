@@ -13,11 +13,12 @@
 
 class PID{
 public:
-    PID(BrickPi3 BP);
+    PID(atomic<bool> &checkerFlag, BrickPi3 BP);
 
-    bool correctPath(std::atomic<bool> &stopFlag);
+    void correctPath(std::atomic<bool> &stopFlag, atomic<bool> &checkerFlag);
 private:
     BrickPi3 BP;
+    atomic<bool> &checkerFlag;
     bool isTooCloseToLeft();
     bool isTooCloseToRight();
     void passTime(float seconds, std::atomic<bool>& stopFlag);

@@ -15,6 +15,8 @@ add_executable(brick_pi_clion main.cpp
         Resource.cpp
         MonitorGyroscope/GyroMonitor.h
         MonitorGyroscope/GyroMonitor.cpp
+        CheckForIntersection/CheckForIntersection.cpp
+        CheckForIntersection/CheckForIntersection.h
 
 )
 
