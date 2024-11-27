@@ -29,6 +29,8 @@ void Rotation::rotateLeft(atomic<bool> &stopFlag){
 	WheelsMovement move(BP);
 	bool ok = false;
 
+	move.goBackwards(0.5);
+
 	motor.resetBothMotorEncoders();
 
 	while((motorDetails.Position < 450)){
@@ -46,6 +48,7 @@ void Rotation::rotateLeft(atomic<bool> &stopFlag){
 		if(stopFlag)
 			break;
 		}
+	move.goForward(1.5);
 	move.stop();
 }
 
@@ -57,6 +60,9 @@ void Rotation::rotateRight(atomic<bool> &stopFlag){
 	MotorDetails motorDetails = {0};
 	WheelsMovement move(BP);
 	bool ok = false;
+
+
+	move.goBackwards(0.5);
 
 	motor.resetBothMotorEncoders();
 
@@ -78,6 +84,7 @@ void Rotation::rotateRight(atomic<bool> &stopFlag){
 			break;
 
 		}
+	move.goForward(1.5);
 	move.stop();
 }
 

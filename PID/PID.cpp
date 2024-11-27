@@ -14,34 +14,37 @@
 #include "../Sensors/getSensorData.h"
 #include "../Motor/motor.h"
 #include "PID.h"
+
+#include <unistd.h>
+
 #include "../Movement/wheelsMovement.h"
 #include "../MonitorGyroscope/GyroMonitor.h"
 
 
 using namespace std;
 
-PID::PID(BrickPi3 BP) : BP(BP) {
+PID::PID(atomic<bool> &checkerFlag, BrickPi3 BP) : checkerFlag(checkerFlag),BP(BP) {
 }
 
 
-bool PID::correctPath(atomic<bool> &stopFlag){
+void PID::correctPath(atomic<bool> &stopFlag, atomic<bool> &checkerFlag){
 
 	GyroMonitor gyroMonitor(stopFlag, BP);
 	WheelsMovement move(BP);
 	int ct = 1;
 	int ctLeft = 1, ctRight = 1;
 
-	while(!stopFlag.load()) {
+	while(!stopFlag.load() ) {
+		if(checkerFlag.load()) {
+			move.stop();
+			return;
+		}
 		if(ct == 1) {
 			move.goForward();
 			//gyroMonitor.startMonitoring();
 			ct = 0;
 		}
 		{
-			Sensor sensor(BP);
-			if(sensor.returnUltrasonicValue(4) > 20 || sensor.returnUltrasonicValue(3) > 20)
-				return true;
-
 			if(ctLeft == 1) {
 				if(isTooCloseToLeft()) {
 					ctLeft = 0;
@@ -56,6 +59,8 @@ bool PID::correctPath(atomic<bool> &stopFlag){
 					correctRight(stopFlag);
 				}
 			}
+			constexpr float second = 1000000.0;
+			usleep(second/2);
 		}
 	}
 

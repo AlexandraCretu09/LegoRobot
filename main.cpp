@@ -16,6 +16,7 @@
 
 
 #include "common.h"
+#include "CheckForIntersection/CheckForIntersection.h"
 #include "MonitorGyroscope/GyroMonitor.h"
 
 #include "Sensors/getSensorData.h"
@@ -60,28 +61,36 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 BP) {
 
 	usleep(second);
 
-	while(!stopFlag.load()) {
-		PID pid(BP);
-		if(pid.correctPath(stopFlag) == true) {
-			Rotation rotate(BP);
-			Sensor sensor(BP);
-			 if(sensor.returnUltrasonicValue(3) > 20) {
-				rotate.rotateRight(stopFlag);
-			 	break;
+	atomic<bool> checkerFlag(false);
+	int ok = 1;
 
-			}
+	while(!stopFlag.load()) {
+		CheckForIntersection checkerThread(stopFlag, checkerFlag, BP);
+		if(ok == 1){
+			checkerThread.startMonitoring();
+			PID pid(checkerFlag, BP);
+			pid.correctPath(stopFlag, checkerFlag);
+			ok = 0;
+		}
+		if(checkerFlag.load()) {
+			checkerThread.stopMonitoring();
+
+			Sensor sensor(BP);
+			Rotation rotate(BP);
+			if(sensor.returnUltrasonicValue(4) > 20)
+				rotate.rotateLeft(stopFlag);
+			if(sensor.returnUltrasonicValue(3) > 20)
+				rotate.rotateRight(stopFlag);
+			ok = 1;
+		}
+		if(stopFlag.load()) {
+			checkerThread.stopMonitoring();
 		}
 
 
 
 	}
 
-	// while(!stopFlag.load()) {
-	// 	Sensor sensor(BP);
-	// 	printf("Left sensor: %f\n", sensor.returnUltrasonicValue(4));
-	// 	printf("Right sensor: %f\n\n", sensor.returnUltrasonicValue(3));
-	// 	usleep(second/5);
-	// }
 	move.stop();
 	//gyroMonitor.stopMonitoring();
 

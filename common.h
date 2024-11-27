@@ -22,6 +22,11 @@ struct MotorDetails{
 	int32_t Encoder;
 };
 
+struct IntersectionCheckerResult {
+	bool left;
+	bool right;
+};
+
 
 
 #endif /* COMMON_H_ */
