@@ -79,6 +79,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 BP) {
 		}
 		if(checkerFlag.load()) {
 			checkerThread.stopMonitoring();
+			IntersectionCheckerResult result = checkerThread.getLatestResult();
 
 			Sensor sensor(BP);
 			Rotation rotate(BP);

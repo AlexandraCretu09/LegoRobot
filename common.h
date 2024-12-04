@@ -25,6 +25,8 @@ struct MotorDetails{
 struct IntersectionCheckerResult {
 	bool left;
 	bool right;
+	bool specialCase1;
+	bool specialCase2;
 };
 
 
