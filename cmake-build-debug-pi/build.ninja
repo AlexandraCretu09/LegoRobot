@@ -133,6 +133,13 @@ build CMakeFiles/brick_pi_clion.dir/CheckForIntersection/CheckForIntersection.cp
   OBJECT_DIR = CMakeFiles/brick_pi_clion.dir
   OBJECT_FILE_DIR = CMakeFiles/brick_pi_clion.dir/CheckForIntersection
 
+build CMakeFiles/brick_pi_clion.dir/SpecialCases/SpecialCases.cpp.o: CXX_COMPILER__brick_pi_clion_unscanned_Debug /home/alexa/brick_pi_clion/SpecialCases/SpecialCases.cpp || cmake_object_order_depends_target_brick_pi_clion
+  DEP_FILE = CMakeFiles/brick_pi_clion.dir/SpecialCases/SpecialCases.cpp.o.d
+  FLAGS = -g -std=gnu++11 -fdiagnostics-color=always
+  INCLUDES = -I/home/alexa/brick_pi_clion/brickpi
+  OBJECT_DIR = CMakeFiles/brick_pi_clion.dir
+  OBJECT_FILE_DIR = CMakeFiles/brick_pi_clion.dir/SpecialCases
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target brick_pi_clion
@@ -141,7 +148,7 @@ build CMakeFiles/brick_pi_clion.dir/CheckForIntersection/CheckForIntersection.cp
 #############################################
 # Link the executable brick_pi_clion
 
-build brick_pi_clion: CXX_EXECUTABLE_LINKER__brick_pi_clion_Debug CMakeFiles/brick_pi_clion.dir/main.cpp.o CMakeFiles/brick_pi_clion.dir/brickpi/BrickPi3.cpp.o CMakeFiles/brick_pi_clion.dir/brickpi/spi.cpp.o CMakeFiles/brick_pi_clion.dir/Motor/motor.cpp.o CMakeFiles/brick_pi_clion.dir/Movement/rotation.cpp.o CMakeFiles/brick_pi_clion.dir/Movement/wheelsMovement.cpp.o CMakeFiles/brick_pi_clion.dir/PID/PID.cpp.o CMakeFiles/brick_pi_clion.dir/Sensors/getSensorData.cpp.o CMakeFiles/brick_pi_clion.dir/common.cpp.o CMakeFiles/brick_pi_clion.dir/Resource.cpp.o CMakeFiles/brick_pi_clion.dir/MonitorGyroscope/GyroMonitor.cpp.o CMakeFiles/brick_pi_clion.dir/CheckForIntersection/CheckForIntersection.cpp.o
+build brick_pi_clion: CXX_EXECUTABLE_LINKER__brick_pi_clion_Debug CMakeFiles/brick_pi_clion.dir/main.cpp.o CMakeFiles/brick_pi_clion.dir/brickpi/BrickPi3.cpp.o CMakeFiles/brick_pi_clion.dir/brickpi/spi.cpp.o CMakeFiles/brick_pi_clion.dir/Motor/motor.cpp.o CMakeFiles/brick_pi_clion.dir/Movement/rotation.cpp.o CMakeFiles/brick_pi_clion.dir/Movement/wheelsMovement.cpp.o CMakeFiles/brick_pi_clion.dir/PID/PID.cpp.o CMakeFiles/brick_pi_clion.dir/Sensors/getSensorData.cpp.o CMakeFiles/brick_pi_clion.dir/common.cpp.o CMakeFiles/brick_pi_clion.dir/Resource.cpp.o CMakeFiles/brick_pi_clion.dir/MonitorGyroscope/GyroMonitor.cpp.o CMakeFiles/brick_pi_clion.dir/CheckForIntersection/CheckForIntersection.cpp.o CMakeFiles/brick_pi_clion.dir/SpecialCases/SpecialCases.cpp.o
   FLAGS = -g
   LINK_LIBRARIES = -lpthread
   OBJECT_DIR = CMakeFiles/brick_pi_clion.dir

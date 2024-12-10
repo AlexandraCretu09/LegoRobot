@@ -28,7 +28,7 @@ private:
     deque<int> leftSensorBuffer;
     deque<int> rightSensorBuffer;
     IntersectionCheckerResult latestResult = {false, false, false};
-    static constexpr size_t BUFFER_SIZE = 10;
+    static constexpr size_t BUFFER_SIZE = 5;
 
     bool isMonitoring;
     thread checkForIntersectionThread;

@@ -9,7 +9,6 @@
 #define GETSENSORDATA_H_
 
 #include <BrickPi3.h>
-#include <atomic>
 
 class Sensor{
 	public:

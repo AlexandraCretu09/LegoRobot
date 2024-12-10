@@ -4,6 +4,7 @@
 #include <iostream>
 #include "CheckForIntersection.h"
 
+#include <atomic>
 #include <unistd.h>
 
 #include "../Movement/wheelsMovement.h"
@@ -26,7 +27,9 @@ void CheckForIntersection::checker() {
         int leftValue = sensor.returnUltrasonicValue(4);
         int rightValue = sensor.returnUltrasonicValue(3);
 
-        updateBuffers(leftValue, rightValue);
+        if(leftValue < 15 && rightValue < 15) {
+            updateBuffers(leftValue, rightValue);
+        }
 
         IntersectionCheckerResult result = {false, false, false, false};
         result.left = (leftValue > 20);
@@ -34,8 +37,10 @@ void CheckForIntersection::checker() {
         result.specialCase1 = checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersection(leftValue, rightValue);
         result.specialCase2 = checkCaseWhereRobotIsTooCloseToWallWithTheIntersection(leftValue, rightValue);
 
+
         if(result.left || result.right) {
             checkerFlag.store(true);
+            stopFlag.store(true);
         }
 
         {
@@ -61,12 +66,12 @@ void CheckForIntersection::updateBuffers(int leftValue, int rightValue) {
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersection(int leftValue, int rightValue) {
     if(leftValue > 20) {
-        if(rightSensorBuffer[9] < 7 && rightSensorBuffer[8] < 7) {
+        if(rightSensorBuffer[4] < 7 && rightSensorBuffer[3] < 7) {
             return true;
         }
     }
     if(rightValue > 20) {
-        if(leftSensorBuffer[9] < 7 && leftSensorBuffer[8] < 7) {
+        if(leftSensorBuffer[4] < 7 && leftSensorBuffer[3] < 7) {
             return true;
         }
     }
@@ -75,12 +80,12 @@ bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersec
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToWallWithTheIntersection(int leftValue, int rightValue) {
     if(leftValue > 20) {
-        if(leftSensorBuffer[9] < 7 && leftSensorBuffer[8] < 7){
+        if(leftSensorBuffer[4] <= 7 && leftSensorBuffer[3] <= 7){
             return true;
         }
     }
     if(rightValue > 20) {
-        if(rightSensorBuffer[9] < 7 && rightSensorBuffer[8] < 7) {
+        if(rightSensorBuffer[4] <= 7 && rightSensorBuffer[3] <= 7) {
             return true;
         }
     }

@@ -92,14 +92,18 @@ bool PID::isTooCloseToRight() {
 }
 
 void PID::passTime(float seconds, atomic<bool>& stopFlag) {
+	// printf("in passTime method\n");
 	clock_t start = clock();
 	while(clock() - start < seconds * CLOCKS_PER_SEC && !stopFlag.load()) {
-		;
+		if(stopFlag.load())
+			break;
 	}
 }
 
 void PID::correctLeft(std::atomic<bool> &stopFlag) {
 
+	if(stopFlag.load())
+		return;
 	WheelsMovement move(BP);
 	printf("in left correction\n");
 	move.moveLeftWheel(255);
@@ -111,6 +115,8 @@ void PID::correctLeft(std::atomic<bool> &stopFlag) {
 
 void PID::correctRight(std::atomic<bool> &stopFlag) {
 
+	if(stopFlag.load())
+		return;
 	WheelsMovement move(BP);
 	printf("in right correction\n");
 	move.moveRightWheel(260);
@@ -124,6 +130,8 @@ void PID::correctRight(std::atomic<bool> &stopFlag) {
 
 void PID::antiCorrection(bool right, atomic<bool>& stopFlag) {
 	WheelsMovement move(BP);
+	if(stopFlag.load())
+		return;
 	if(right) {
 		printf("anticorrection on right\n");
 		move.moveRightWheel(248);
