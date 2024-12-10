@@ -24,6 +24,7 @@
 #include "Movement/rotation.h"
 #include "Movement/wheelsMovement.h"
 #include "PID/PID.h"
+#include "SpecialCases/SpecialCases.h"
 
 using namespace std;
 
@@ -51,6 +52,14 @@ void monitorKillButton(Sensor& button, atomic<bool>& stopFlag, BrickPi3 &BP){
 // 	}
 // }
 
+void printIntersectionResult(IntersectionCheckerResult result) {
+	printf("Intersection result:\n");
+	printf("Intersection on the right: %B\n", result.right );
+	printf("Intersection on the left: %B\n", result.left );
+	printf("Special case 1: %B\n", result.specialCase1);
+	printf("Special case 2: %B\n", result.specialCase2);
+}
+
 void testRobot(atomic<bool> &stopFlag,BrickPi3 BP) {
 
 
@@ -67,27 +76,35 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 BP) {
 	usleep(second);
 
 	atomic<bool> checkerFlag(false);
-	int ok = 1;
+	bool ok = true;
 
 	while(!stopFlag.load()) {
 		CheckForIntersection checkerThread(stopFlag, checkerFlag, BP);
-		if(ok == 1){
+		if(ok){
 			checkerThread.startMonitoring();
 			PID pid(checkerFlag, BP);
 			pid.correctPath(stopFlag, checkerFlag);
-			ok = 0;
+			ok = false;
 		}
 		if(checkerFlag.load()) {
 			checkerThread.stopMonitoring();
+			IntersectionCheckerResult result = checkerThread.getLatestResult();
 
-			Sensor sensor(BP);
-			Rotation rotate(BP);
-			if(sensor.returnUltrasonicValue(4) > 20)
-				rotate.rotateLeft(stopFlag);
-			if(sensor.returnUltrasonicValue(3) > 20)
-				rotate.rotateRight(stopFlag);
+			printIntersectionResult(result);
+
+			// Sensor sensor(BP);
+			// Rotation rotate(BP);
+
+			SpecialCases specialCases(BP);
+			if(result.specialCase1)
+				specialCases.specialCase1();
+			else if(result.specialCase2)
+				specialCases.specialCase2();
+			else
+				printf("Not in any special case\n");
 			checkerFlag.store(false);
-			ok = 1;
+			// ok = 1;
+			stopFlag.store(true);
 		}
 		if(stopFlag.load()) {
 			checkerThread.stopMonitoring();

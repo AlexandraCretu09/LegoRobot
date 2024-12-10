@@ -17,6 +17,8 @@ add_executable(brick_pi_clion main.cpp
         MonitorGyroscope/GyroMonitor.cpp
         CheckForIntersection/CheckForIntersection.cpp
         CheckForIntersection/CheckForIntersection.h
+        SpecialCases/SpecialCases.cpp
+        SpecialCases/SpecialCases.h
 
 )
 

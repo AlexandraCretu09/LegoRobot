@@ -7,6 +7,9 @@
 #include <ctime>
 
 #include "GyroMonitor.h"
+
+#include <atomic>
+
 #include "../Sensors/getSensorData.h"
 #include "../common.h"
 
