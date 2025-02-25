@@ -16,7 +16,8 @@ class Sensor{
 		int getPortNumber(int x);
 		float returnUltrasonicValue(int x);
 		bool killButton();
-		sensor_gyro_t returnGyroValue();
+
+		double returnGyroValue();
 private:
 	BrickPi3 &BP;
 };

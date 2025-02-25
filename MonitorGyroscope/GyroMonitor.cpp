@@ -24,8 +24,8 @@ GyroMonitor::GyroMonitor(atomic<bool>& stopFlag, BrickPi3& BP)
 
 int GyroMonitor::getGyroscopeReading() {
     Sensor sensor(BP);
-    sensor_gyro_t gyroValues = sensor.returnGyroValue();
-    return gyroValues.abs;
+    double gyroValues = sensor.returnGyroValue();
+    return gyroValues;
 }
 
 bool GyroMonitor::isRobotStuck() {

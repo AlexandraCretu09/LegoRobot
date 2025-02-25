@@ -4,6 +4,7 @@
 
 #ifndef CHECKFORINTERSECTION_H
 #define CHECKFORINTERSECTION_H
+#include <atomic>
 #include <BrickPi3.h>
 #include <deque>
 #include <thread>
@@ -27,7 +28,7 @@ private:
     BrickPi3& BP;
     deque<int> leftSensorBuffer;
     deque<int> rightSensorBuffer;
-    IntersectionCheckerResult latestResult = {false, false, false};
+    IntersectionCheckerResult latestResult = {false, false, false, false, false};
     static constexpr size_t BUFFER_SIZE = 5;
 
     bool isMonitoring;

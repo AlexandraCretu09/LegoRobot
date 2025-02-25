@@ -40,7 +40,7 @@ void Rotation::rotateLeft(atomic<bool> &stopFlag){
 			ok = true;
 		}
 		Sensor sensor(BP);
-		sensor_gyro_t gyroValues = sensor.returnGyroValue();
+		double gyroValues = sensor.returnGyroValue();
 		// printf("Abs: %d\n", gyroValues.abs);
 
 		motorDetails = motor.getRightMotorStatus();
@@ -76,7 +76,7 @@ void Rotation::rotateRight(atomic<bool> &stopFlag){
 		}
 
 		Sensor sensor(BP);
-		sensor_gyro_t gyroValues = sensor.returnGyroValue();
+		double gyroValues = sensor.returnGyroValue();
 		//printf("Abs: %d\n", gyroValues.abs);
 
 		motorDetails = motor.getLeftMotorStatus();

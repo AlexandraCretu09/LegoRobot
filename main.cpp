@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "CheckForIntersection/CheckForIntersection.h"
+#include "MappingLogic/IntersectionDetails.h"
 #include "MonitorGyroscope/GyroMonitor.h"
 
 #include "Sensors/getSensorData.h"
@@ -25,6 +26,7 @@
 #include "Movement/wheelsMovement.h"
 #include "PID/PID.h"
 #include "SpecialCases/SpecialCases.h"
+#include "MappingLogic/IntersectionDetails.h"
 
 using namespace std;
 
@@ -54,64 +56,66 @@ void monitorKillButton(Sensor& button, atomic<bool>& stopFlag, BrickPi3 &BP){
 
 void printIntersectionResult(IntersectionCheckerResult result) {
 	printf("Intersection result:\n");
-	printf("Intersection on the right: %B\n", result.right );
-	printf("Intersection on the left: %B\n", result.left );
-	printf("Special case 1: %B\n", result.specialCase1);
-	printf("Special case 2: %B\n", result.specialCase2);
+	printf("Intersection on the right: %d\n", result.right );
+	printf("Intersection on the left: %d\n", result.left );
+	printf("Intersection on the forward: %d\n", result.forward );
+	printf("Special case 1: %d\n", result.specialCase1);
+	printf("Special case 2: %d\n", result.specialCase2);
 }
 
-void testRobot(atomic<bool> &stopFlag,BrickPi3 BP) {
+void startMovement(atomic<bool> &stopFlag, atomic<bool> &checkerFlag,
+	CheckForIntersection &checkerThread, BrickPi3 BP) {
+	checkerThread.startMonitoring();
+	PID pid(checkerFlag, BP);
+	pid.correctPath(stopFlag, checkerFlag);
+}
+
+IntersectionCheckerResult rememberIntersection(atomic<bool> &stopFlag, CheckForIntersection &checkerThread, BrickPi3 BP) {
+	checkerThread.stopMonitoring();
+	IntersectionCheckerResult result = checkerThread.getLatestResult();
+	printIntersectionResult(result);
+	return result;
+	//stopFlag.store(true);
+}
+
+void addNewIntersectionToMap(IntersectionDetails &map, IntersectionCheckerResult result) {
+	// bool right, left, forward;
+	// right = left = forward = false;
+	// if (result.left) left = true;
+	// if (result.right) right = true;
+	// if (result.forward)  forward = true;
+	map.addNewIntersection();
+	map.printAllNodes();
+}
 
 
+void testRobot(atomic<bool> &stopFlag,BrickPi3 BP){
 
 	Motor motor(BP);
 	WheelsMovement move(BP);
-
-	// move.stop();
-	// return;
+	Sensor sensor(BP);
 
 	printf("Reset encoders\n");
 	motor.resetBothMotorEncoders();
 
 	usleep(second);
+	IntersectionDetails map(sensor.returnGyroValue());
 
 	atomic<bool> checkerFlag(false);
 	bool ok = true;
+	CheckForIntersection checkerThread(stopFlag, checkerFlag, BP);
 
-	while(!stopFlag.load()) {
-		CheckForIntersection checkerThread(stopFlag, checkerFlag, BP);
-		if(ok){
-			checkerThread.startMonitoring();
-			PID pid(checkerFlag, BP);
-			pid.correctPath(stopFlag, checkerFlag);
+
+	while (!stopFlag.load()) {
+		if (ok) {
+			startMovement(stopFlag, checkerFlag, checkerThread, BP);
 			ok = false;
 		}
-		if(checkerFlag.load()) {
-			checkerThread.stopMonitoring();
-			IntersectionCheckerResult result = checkerThread.getLatestResult();
-
-			printIntersectionResult(result);
-
-			// Sensor sensor(BP);
-			// Rotation rotate(BP);
-
-			SpecialCases specialCases(BP);
-			if(result.specialCase1)
-				specialCases.specialCase1();
-			else if(result.specialCase2)
-				specialCases.specialCase2();
-			else
-				printf("Not in any special case\n");
-			checkerFlag.store(false);
-			// ok = 1;
+		if (checkerFlag.load()) {
+			IntersectionCheckerResult result = rememberIntersection(stopFlag, checkerThread, BP);
+			addNewIntersectionToMap(map, result);
 			stopFlag.store(true);
 		}
-		if(stopFlag.load()) {
-			checkerThread.stopMonitoring();
-		}
-
-
-
 	}
 
 	move.stop();
@@ -119,6 +123,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 BP) {
 
 	stopFlag.store(true);
 }
+
 
 
 
@@ -145,11 +150,11 @@ int main(void)
 	BP.get_id(str);
 	printf("Serial Number   : %s\n", str);
 
-	BP.get_version_hardware(str);
-	printf("Hardware version: %s\n", str);
+	//BP.get_version_hardware(str);
+	//printf("Hardware version: %s\n", str);
 
-	BP.get_version_firmware(str);
-	printf("Firmware version: %s\n", str);
+	//BP.get_version_firmware(str);
+	//printf("Firmware version: %s\n", str);
 
 	printf("Battery voltage : %.3f\n", BP.get_voltage_battery());
 	printf("9v voltage      : %.3f\n", BP.get_voltage_9v());

@@ -19,6 +19,8 @@ add_executable(brick_pi_clion main.cpp
         CheckForIntersection/CheckForIntersection.h
         SpecialCases/SpecialCases.cpp
         SpecialCases/SpecialCases.h
+        MappingLogic/IntersectionDetails.cpp
+        MappingLogic/IntersectionDetails.h
 
 )
 
