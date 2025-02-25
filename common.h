@@ -25,8 +25,15 @@ struct MotorDetails{
 struct IntersectionCheckerResult {
 	bool left;
 	bool right;
+	bool forward;
 	bool specialCase1;
 	bool specialCase2;
+};
+
+enum direction {
+	forward,
+	right,
+	left
 };
 
 

@@ -10,6 +10,9 @@
 #include <mutex>
 
 #include "getSensorData.h"
+
+#include <unistd.h>
+
 #include "../common.h"
 
 using namespace std;
@@ -51,22 +54,28 @@ float Sensor::returnUltrasonicValue(int x){
 }
 
 bool Sensor::killButton(){
-	sensor_touch_t Button;
+	// sensor_touch_t Button;
 
-	lock_guard<mutex> lock(bpMutex);
+	// lock_guard<mutex> lock(bpMutex);
 
-	if(!BP.get_sensor(PORT_2, &Button)){
-		return Button.pressed;
+	// if(!BP.get_sensor(PORT_2, &Button)){
+	// 	return Button.pressed;
+	// }
+	if (returnUltrasonicValue(3) <= 5 && returnUltrasonicValue(3) > 0 &&
+		returnUltrasonicValue(4) > 0 && returnUltrasonicValue(4) <= 5) {
+		printf("sensor values: %f, %f ",returnUltrasonicValue(3), returnUltrasonicValue(4));
+		return true;
 	}
 	return false;
 }
 
-sensor_gyro_t Sensor::returnGyroValue(){
+double Sensor::returnGyroValue(){
 	sensor_gyro_t Gyro;
 
 	lock_guard<mutex> lock(bpMutex);
 	if(!BP.get_sensor(PORT_1, &Gyro)){
-		return Gyro;
+		double abs = double(Gyro.abs);
+		return abs;
 	}
 }
 
