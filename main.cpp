@@ -126,6 +126,8 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 BP){
 		}
 	}
 
+
+
 	move.stop();
 	//gyroMonitor.stopMonitoring();
 
@@ -173,7 +175,7 @@ int main(void)
 	BP.set_sensor_type(PORT_4, SENSOR_TYPE_NXT_ULTRASONIC); // left
 	BP.set_sensor_type(PORT_3, SENSOR_TYPE_NXT_ULTRASONIC); // right
 	BP.set_sensor_type(PORT_1, SENSOR_TYPE_EV3_GYRO_ABS_DPS); //
-	BP.set_sensor_type(PORT_2, SENSOR_TYPE_TOUCH); //
+	BP.set_sensor_type(PORT_2, SENSOR_TYPE_NXT_ULTRASONIC); //
 
 
 

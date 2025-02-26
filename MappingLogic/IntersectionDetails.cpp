@@ -55,10 +55,10 @@ void IntersectionDetails::printAllNodes() {
     intersectionNode *copy = currentNode;
     int x = 1;
     do {
-        printf("\nChild nodes of node %d\n", x);
-        printf("to the right: %d\n", copy->right);
-        printf("to the left: %d\n", copy->left);
-        printf("forward: %d\n", copy->forward);
+        // printf("\nChild nodes of node %d\n", x);
+        // printf("to the right: %d\n", copy->right);
+        // printf("to the left: %d\n", copy->left);
+        // printf("forward: %d\n", copy->forward);
         printf("\nPossible directions of node%d\n", x);
         printf("to the right: %d\n", copy->possibleIntersectionWays.right);
         printf("to the left: %d\n", copy->possibleIntersectionWays.left);
@@ -76,6 +76,7 @@ direction IntersectionDetails::getCurrentDirection() {
 }
 
 turnDirection IntersectionDetails::chooseNextDirection() {
+
     IntersectionWays possibleWays = getIntersectionPossibleWays();
 
     switch (currentNode->currentDirection) {
@@ -85,18 +86,21 @@ turnDirection IntersectionDetails::chooseNextDirection() {
             if (possibleWays.forward)
                 return goStraight;
             if (possibleWays.left)
-                return goStraight;
+                return turnLeft;
             return turnBackwards;
+
         case direction::right:
             if (possibleWays.forward)
                 return turnRight;
             if (possibleWays.left)
                 return goStraight;
             return turnLeft;
+
         case direction::forward:
             if (possibleWays.left)
                 return turnRight;
             return goStraight;
+
         case direction::left:
             return turnRight;
     }
@@ -104,7 +108,7 @@ turnDirection IntersectionDetails::chooseNextDirection() {
 
 
 IntersectionWays IntersectionDetails::getIntersectionPossibleWays() {
-    IntersectionWays intersectionWays;
+    IntersectionWays intersectionWays = {false, false, false};
     if (currentNode->possibleIntersectionWays.right)
         intersectionWays.right = true;
     if (currentNode->possibleIntersectionWays.left)

@@ -98,6 +98,7 @@ bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToWallWithTheIntersectio
 
 IntersectionCheckerResult CheckForIntersection::getLatestResult() {
     lock_guard<mutex> lock(resultMutex);
+    printf("Right: %d\n Left: %d\nForward: %d\n\n", latestResult.left, latestResult.right, latestResult.forward);
     return latestResult;
 }
 
