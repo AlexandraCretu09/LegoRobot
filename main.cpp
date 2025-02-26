@@ -64,7 +64,8 @@ void printIntersectionResult(IntersectionCheckerResult result) {
 }
 
 void startMovement(atomic<bool> &stopFlag, atomic<bool> &checkerFlag,
-	CheckForIntersection &checkerThread, BrickPi3 BP) {
+		CheckForIntersection &checkerThread, BrickPi3 BP) {
+
 	checkerThread.startMonitoring();
 	PID pid(checkerFlag, BP);
 	pid.correctPath(stopFlag, checkerFlag);
@@ -78,15 +79,25 @@ IntersectionCheckerResult rememberIntersection(atomic<bool> &stopFlag, CheckForI
 	//stopFlag.store(true);
 }
 
+IntersectionWays convertIntersectionWithSpecialCasesToOnlyWays(IntersectionCheckerResult fullResult){
+	IntersectionWays result = {false, false, false};
+	if (fullResult.left) result.left = true;
+	if (fullResult.right) result.right = true;
+	if (fullResult.forward)  result.forward = true;
+	return result;
+}
+
 void addNewIntersectionToMap(IntersectionDetails &map, IntersectionCheckerResult result) {
-	// bool right, left, forward;
-	// right = left = forward = false;
-	// if (result.left) left = true;
-	// if (result.right) right = true;
-	// if (result.forward)  forward = true;
-	map.addNewIntersection();
+
+	map.addNewIntersection(convertIntersectionWithSpecialCasesToOnlyWays(result));
 	map.printAllNodes();
 }
+
+void chooseNextDirection(IntersectionDetails &map) {
+
+}
+
+
 
 
 void testRobot(atomic<bool> &stopFlag,BrickPi3 BP){

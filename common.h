@@ -30,6 +30,12 @@ struct IntersectionCheckerResult {
 	bool specialCase2;
 };
 
+struct IntersectionWays {
+	bool left;
+	bool right;
+	bool forward;
+};
+
 enum direction {
 	forward,
 	right,
