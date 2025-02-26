@@ -26,7 +26,7 @@ void CheckForIntersection::checker() {
 
         int leftValue = sensor.returnUltrasonicValue(4);
         int rightValue = sensor.returnUltrasonicValue(3);
-        //ToDo: int forwardValue = sensor.returnUltrasonicValue(??);
+        int forwardValue = sensor.returnUltrasonicValue(2);
 
 
         if(leftValue < 15 && rightValue < 15) {
@@ -36,7 +36,7 @@ void CheckForIntersection::checker() {
         IntersectionCheckerResult result = {false, false, false, false, false};
         result.left = (leftValue > 20);
         result.right = (rightValue > 20);
-        //ToDo result.forward = (forwardValue > 20);
+        result.forward = (forwardValue > 20);
         result.specialCase1 = checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersection(leftValue, rightValue);
         result.specialCase2 = checkCaseWhereRobotIsTooCloseToWallWithTheIntersection(leftValue, rightValue);
 
