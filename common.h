@@ -40,6 +40,7 @@ enum direction {
 	left,
 	right,
 	forward,
+	backwards,
 	nothing
 };
 
