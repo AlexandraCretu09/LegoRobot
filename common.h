@@ -37,9 +37,17 @@ struct IntersectionWays {
 };
 
 enum direction {
-	forward,
+	left,
 	right,
-	left
+	forward,
+	nothing
+};
+
+enum turnDirection {
+	turnRight,
+	turnLeft,
+	turnBackwards,
+	goStraight
 };
 
 

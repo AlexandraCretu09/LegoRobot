@@ -24,11 +24,13 @@ class IntersectionDetails {
 public:
     IntersectionDetails(int gyroscopeReading);
     void addNewIntersection(IntersectionWays possibleIntersectionWays);
-    void setNewDirection(bool right, bool left, bool forward);
     void printAllNodes();
-    IntersectionWays getIntersectionWays();
+    turnDirection chooseNextDirection();
+    direction getCurrentDirection();
 private:
     intersectionNode *currentNode;
+    IntersectionWays getIntersectionPossibleWays();
+    IntersectionWays getIntersectionVisitedWays();
 };
 
 

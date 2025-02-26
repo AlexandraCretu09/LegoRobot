@@ -27,6 +27,7 @@ void IntersectionDetails::addNewIntersection(IntersectionWays possibleIntersecti
     newNode->forward = nullptr;
     newNode->left = nullptr;
     newNode->right = nullptr;
+    newNode->currentDirection = direction::nothing;
 
     switch (currentNode->currentDirection) {
         case direction::forward:
@@ -46,13 +47,6 @@ void IntersectionDetails::addNewIntersection(IntersectionWays possibleIntersecti
         newNode->possibleIntersectionWays.right = true;
     if (possibleIntersectionWays.left)
         newNode->possibleIntersectionWays.left = true;
-
-    // if (currentNode->currentDirection == direction::forward)
-    //     currentNode->forward = newNode;
-    // if (currentNode->currentDirection == direction::right)
-    //     currentNode->right = newNode;
-    // if (currentNode->currentDirection == direction::left)
-    //     currentNode->left = newNode;
 
     currentNode = newNode;
 }
@@ -75,10 +69,62 @@ void IntersectionDetails::printAllNodes() {
     } while (copy != nullptr);
 }
 
-// IntersectionWays IntersectionDetails::getIntersectionWays() {
-//     IntersectionWays intersectionWays;
-//      if (currentNode->)
-// }
+
+
+direction IntersectionDetails::getCurrentDirection() {
+    return currentNode->currentDirection;
+}
+
+turnDirection IntersectionDetails::chooseNextDirection() {
+    IntersectionWays possibleWays = getIntersectionPossibleWays();
+
+    switch (currentNode->currentDirection) {
+        case nothing:
+            if (possibleWays.right)
+                return turnRight;
+            if (possibleWays.forward)
+                return goStraight;
+            if (possibleWays.left)
+                return goStraight;
+            return turnBackwards;
+        case direction::right:
+            if (possibleWays.forward)
+                return turnRight;
+            if (possibleWays.left)
+                return goStraight;
+            return turnLeft;
+        case direction::forward:
+            if (possibleWays.left)
+                return turnRight;
+            return goStraight;
+        case direction::left:
+            return turnRight;
+    }
+}
+
+
+IntersectionWays IntersectionDetails::getIntersectionPossibleWays() {
+    IntersectionWays intersectionWays;
+    if (currentNode->possibleIntersectionWays.right)
+        intersectionWays.right = true;
+    if (currentNode->possibleIntersectionWays.left)
+        intersectionWays.left = true;
+    if (currentNode->possibleIntersectionWays.forward)
+        intersectionWays.forward = true;
+    return intersectionWays;
+}
+IntersectionWays IntersectionDetails::getIntersectionVisitedWays() {
+    IntersectionWays intersectionWays;
+    if (currentNode->visitedIntersectionWays.right)
+        intersectionWays.right = true;
+    if (currentNode->visitedIntersectionWays.left)
+        intersectionWays.left = true;
+    if (currentNode->visitedIntersectionWays.forward)
+        intersectionWays.forward = true;
+    return intersectionWays;
+}
+
+
 
 
 
