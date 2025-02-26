@@ -122,10 +122,14 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 BP){
 			IntersectionCheckerResult result = rememberIntersection(stopFlag, checkerThread, BP);
 			addNewIntersectionToMap(map, result);
 			chooseNextDirection(map);
+			map.printCurrentNode();
 			stopFlag.store(true);
 		}
 	}
-
+	// for (int i=0; i<10;i ++) {
+	// 	printf("sensor: %f\n",sensor.returnUltrasonicValue(2));
+	// 	usleep(second);
+	// }
 
 
 	move.stop();

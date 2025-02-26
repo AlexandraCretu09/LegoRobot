@@ -69,6 +69,16 @@ void IntersectionDetails::printAllNodes() {
     } while (copy != nullptr);
 }
 
+void IntersectionDetails::printCurrentNode() {
+    intersectionNode *copy = currentNode;
+    printf("\nPossible directions of chosen node:\n");
+    printf("to the right: %d\n", copy->possibleIntersectionWays.right);
+    printf("to the left: %d\n", copy->possibleIntersectionWays.left);
+    printf("forward: %d\n", copy->possibleIntersectionWays.forward);
+    printf("Direction taken: %d\n\n", copy->currentDirection);
+}
+
+
 
 
 direction IntersectionDetails::getCurrentDirection() {
@@ -81,27 +91,45 @@ turnDirection IntersectionDetails::chooseNextDirection() {
 
     switch (currentNode->currentDirection) {
         case nothing:
-            if (possibleWays.right)
+            printf("in case nothing, ");
+            if (possibleWays.right) {
+                currentNode->currentDirection = direction::right;
                 return turnRight;
-            if (possibleWays.forward)
+            }
+            if (possibleWays.forward) {
+                printf("forward\n");
+                currentNode->currentDirection = direction::forward;
                 return goStraight;
-            if (possibleWays.left)
+            }
+            if (possibleWays.left) {
+                currentNode->currentDirection = direction::left;
                 return turnLeft;
+            }
+            currentNode->currentDirection = direction::backwards;
             return turnBackwards;
 
         case direction::right:
-            if (possibleWays.forward)
+            if (possibleWays.forward) {
+                currentNode->currentDirection = direction::forward;
                 return turnRight;
-            if (possibleWays.left)
+            }
+            if (possibleWays.left) {
+                currentNode->currentDirection = direction::left;
                 return goStraight;
+            }
+            currentNode->currentDirection = direction::backwards;
             return turnLeft;
 
         case direction::forward:
-            if (possibleWays.left)
+            if (possibleWays.left) {
+                currentNode->currentDirection = direction::left;
                 return turnRight;
+            }
+            currentNode->currentDirection = direction::backwards;
             return goStraight;
 
         case direction::left:
+            currentNode->currentDirection = direction::backwards;
             return turnRight;
     }
 }
