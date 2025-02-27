@@ -91,13 +91,11 @@ turnDirection IntersectionDetails::chooseNextDirection() {
 
     switch (currentNode->currentDirection) {
         case nothing:
-            printf("in case nothing, ");
             if (possibleWays.right) {
                 currentNode->currentDirection = direction::right;
                 return turnRight;
             }
             if (possibleWays.forward) {
-                printf("forward\n");
                 currentNode->currentDirection = direction::forward;
                 return goStraight;
             }

@@ -24,9 +24,9 @@ void CheckForIntersection::checker() {
     Sensor sensor(BP);
     while(isMonitoring && !stopFlag.load()) {
 
-        int leftValue = sensor.returnUltrasonicValue(4);
-        int rightValue = sensor.returnUltrasonicValue(3);
-        int forwardValue = sensor.returnUltrasonicValue(2);
+        float leftValue = sensor.returnUltrasonicValue(4);
+        float rightValue = sensor.returnUltrasonicValue(3);
+        float forwardValue = sensor.returnUltrasonicValue(2);
 
 
         if(leftValue < 15 && rightValue < 15) {
@@ -46,10 +46,23 @@ void CheckForIntersection::checker() {
             stopFlag.store(true);
         }
 
+        if (!result.left && !result.right && !result.forward) {
+            if (forwardValue <= 7) {
+                printf("Forward value: %f\n", forwardValue);
+                result.deadend = true;
+                checkerFlag.store(true);
+                stopFlag.store(true);
+            }
+        }
+
         {
             lock_guard<mutex> lock(resultMutex);
             latestResult = result;
         }
+
+        printf("Right value: %f\n", rightValue);
+        printf("Left value: %f\n", leftValue);
+        printf("Forward value: %f\n", forwardValue);
 
         constexpr float second = 1000000.0;
         usleep(second/8);
