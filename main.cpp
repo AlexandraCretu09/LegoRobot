@@ -73,8 +73,8 @@ void startMovement(atomic<bool> &stopFlag, atomic<bool> &checkerFlag,
 
 IntersectionCheckerResult rememberIntersection(atomic<bool> &stopFlag, CheckForIntersection &checkerThread, BrickPi3 BP) {
 	checkerThread.stopMonitoring();
+	stopFlag.store(false);
 	IntersectionCheckerResult result = checkerThread.getLatestResult();
-	//printIntersectionResult(result);
 	return result;
 }
 
@@ -86,17 +86,45 @@ IntersectionWays convertIntersectionWithSpecialCasesToOnlyWays(IntersectionCheck
 	return result;
 }
 
-void addNewIntersectionToMap(IntersectionDetails &map, IntersectionCheckerResult result) {
+void addNewIntersectionToMap(IntersectionDetails &map, IntersectionWays result) {
 
-	map.addNewIntersection(convertIntersectionWithSpecialCasesToOnlyWays(result));
+	map.addNewIntersection(result);
 	map.printAllNodes();
 }
 
-void chooseNextDirection(IntersectionDetails map) {
-	printf("Next direction should be: %d\n\n", map.chooseNextDirection());
+void chooseNextDirection(IntersectionDetails map, atomic<bool> &stopFlag, BrickPi3 &BP) {
+	turnDirection nextRotation = map.chooseNextDirection();
+	printf("Next direction should be: %d\n\n", nextRotation);
+	Rotation rotation(BP);
+
+	switch (nextRotation) {
+		case turnRight:
+			rotation.rotateRight(stopFlag);
+			break;
+		case turnLeft:
+			rotation.rotateLeft(stopFlag);
+			break;
+		case goStraight:
+			rotation.goStraight(stopFlag);
+			break;
+		case turnBackwards:
+			printf("in choose next direction\n");
+			rotation.rotateBackwards(stopFlag);
+			break;
+	}
 }
 
-void testRobot(atomic<bool> &stopFlag,BrickPi3 BP){
+void checkDeadend(atomic<bool> &stopFlag, IntersectionCheckerResult fullResult, BrickPi3 &BP) {
+	printf("in checkDeadend method \n");
+	Rotation rotate(BP);
+	if (fullResult.deadend) {
+		rotate.rotateBackwards(stopFlag);
+	}
+}
+
+
+
+void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 	Motor motor(BP);
 	WheelsMovement move(BP);
@@ -114,15 +142,19 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 BP){
 
 
 	while (!stopFlag.load()) {
+		 // break;
 		if (ok) {
 			startMovement(stopFlag, checkerFlag, checkerThread, BP);
 			ok = false;
 		}
 		if (checkerFlag.load()) {
-			IntersectionCheckerResult result = rememberIntersection(stopFlag, checkerThread, BP);
+			IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
+			// IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
+			// if (fullResult.deadend)
+			// 	checkDeadend(stopFlag, fullResult, BP);
+			IntersectionWays result = {false, false, false};
 			addNewIntersectionToMap(map, result);
-			chooseNextDirection(map);
-			map.printCurrentNode();
+			chooseNextDirection(map, stopFlag, BP);
 			stopFlag.store(true);
 		}
 	}
@@ -134,7 +166,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 BP){
 
 	move.stop();
 	//gyroMonitor.stopMonitoring();
-
+	checkerThread.stopMonitoring();
 	stopFlag.store(true);
 }
 

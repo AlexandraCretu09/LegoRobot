@@ -28,6 +28,7 @@ struct IntersectionCheckerResult {
 	bool forward;
 	bool specialCase1;
 	bool specialCase2;
+	bool deadend;
 };
 
 struct IntersectionWays {
