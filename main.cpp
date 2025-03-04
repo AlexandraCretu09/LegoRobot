@@ -158,6 +158,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 			stopFlag.store(true);
 		}
 	}
+
 	// for (int i=0; i<10;i ++) {
 	// 	printf("sensor: %f\n",sensor.returnUltrasonicValue(2));
 	// 	usleep(second);
@@ -168,6 +169,12 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	//gyroMonitor.stopMonitoring();
 	checkerThread.stopMonitoring();
 	stopFlag.store(true);
+
+	     // Sensor sensorObj(BP);  // Create Sensor object
+	     // SpecialCases specialCases(BP);
+	     //
+	     // specialCases.cornerTrapRight(sensorObj, BP); // Handle left case
+
 }
 
 
