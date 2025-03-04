@@ -13,7 +13,7 @@
 
 
 using namespace std;
-// float second3 = ;
+float second2 =1000000;
 SpecialCases::SpecialCases(BrickPi3 BP) : BP(BP) {}
 
 void SpecialCases::toCloseToTheRight(Sensor &sensorObj, BrickPi3 &BP) {  // Pass Sensor object as parameter
@@ -25,12 +25,12 @@ void SpecialCases::toCloseToTheRight(Sensor &sensorObj, BrickPi3 &BP) {  // Pass
         // Move backward while turning left (right wheel faster)
         motor.setRightWheelDPS(-250);  // Right wheel moves faster
         motor.setLeftWheelDPS(-150);   // Left wheel moves slower
-        usleep(1000000.0*1.2);  // Move for 1 second
+        usleep(second2*1.2);  // Move for 1 second
 
         // Rectify position (left wheel moves faster)
         motor.setRightWheelDPS(-100);  // Right wheel slower
         motor.setLeftWheelDPS(-310);   // Left wheel faster
-        usleep(1000000.0/2);
+        usleep(second2/2);
 
         // Stop the motors
         motor.setRightWheelDPS(0);
@@ -46,12 +46,12 @@ void SpecialCases::toCloseToTheLeft(Sensor &sensorObj, BrickPi3 &BP) {
         // Move backward while turning right (left wheel faster)
         motor.setLeftWheelDPS(-250);   // Left wheel moves faster
         motor.setRightWheelDPS(-150);  // Right wheel moves slower
-        usleep(1000000.0*1.2);  // Move for 1 second
+        usleep(second2*1.2);  // Move for 1 second
 
         // Rectify position (right wheel moves faster)
         motor.setLeftWheelDPS(-100);   // Left wheel slower
         motor.setRightWheelDPS(-310);  // Right wheel faster
-        usleep(1000000.0/2);  // Move for 0.5 seconds
+        usleep(second2/2);  // Move for 0.5 seconds
 
         // Stop the motors
         motor.setLeftWheelDPS(0);
@@ -81,11 +81,11 @@ void SpecialCases::cornerTrapRight(Sensor &sensorObj, BrickPi3 &BP) {
     if (rightSensor <= 6) {
         motor.setRightWheelDPS(-250);  // Right wheel moves faster
         motor.setLeftWheelDPS(-150);   // Left wheel moves slower
-        usleep(1000000*1.2);  // Move for 1 second
+        usleep(second2*1.2);  // Move for 1 second
 
         motor.setRightWheelDPS(-100);  // Right wheel slower
         motor.setLeftWheelDPS(-310);   // Left wheel faster
-        usleep(500000);  // Move for 0.5 seconds
+        usleep(second2/2);  // Move for 0.5 seconds
 
         motor.setRightWheelDPS(0);
         motor.setLeftWheelDPS(0);
@@ -108,11 +108,11 @@ void SpecialCases::cornerTrapLeft(Sensor &sensorObj, BrickPi3 &BP) {
     if (leftSensor <= 6) {
         motor.setLeftWheelDPS(-250);   // Left wheel moves faster
         motor.setRightWheelDPS(-150);  // Right wheel moves slower
-        usleep(1000000*1.2);  // Move for 1 second
+        usleep(second2*1.2);  // Move for 1 second
 
         motor.setLeftWheelDPS(-100);   // Left wheel slower
         motor.setRightWheelDPS(-310);  // Right wheel faster
-        usleep(500000);  // Move for 0.5 seconds
+        usleep(second2/2);  // Move for 0.5 seconds
 
         motor.setLeftWheelDPS(0);
         motor.setRightWheelDPS(0);
