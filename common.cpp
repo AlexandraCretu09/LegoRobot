@@ -9,5 +9,7 @@
 
 std::mutex bpMutex;
 
+bool returnToLastIntersection = false;
+
 
 
