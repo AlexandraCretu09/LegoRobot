@@ -31,7 +31,7 @@
 using namespace std;
 
 extern mutex bpMutex;
-
+extern bool returnToLastIntersection;
 
 bool ok = false;
 float second = 1000000.0;
@@ -89,7 +89,7 @@ IntersectionWays convertIntersectionWithSpecialCasesToOnlyWays(IntersectionCheck
 void addNewIntersectionToMap(IntersectionDetails &map, IntersectionWays result) {
 
 	map.addNewIntersection(result);
-	map.printAllNodes();
+	map.printAllParentNodes();
 }
 
 void chooseNextDirection(IntersectionDetails map, atomic<bool> &stopFlag, BrickPi3 &BP) {
@@ -97,28 +97,38 @@ void chooseNextDirection(IntersectionDetails map, atomic<bool> &stopFlag, BrickP
 	printf("Next direction should be: %d\n\n", nextRotation);
 	Rotation rotation(BP);
 
-	switch (nextRotation) {
-		case turnRight:
-			rotation.rotateRight(stopFlag);
-			break;
-		case turnLeft:
-			rotation.rotateLeft(stopFlag);
-			break;
-		case goStraight:
-			rotation.goStraight(stopFlag);
-			break;
-		case turnBackwards:
-			printf("in choose next direction\n");
-			rotation.rotateBackwards(stopFlag);
-			break;
+	if (!stopFlag.load()) {
+		switch (nextRotation) {
+			case turnRight:
+				rotation.rotateRight(stopFlag);
+				break;
+			case turnLeft:
+				rotation.rotateLeft(stopFlag);
+				break;
+			case goStraight:
+				rotation.goStraight(stopFlag);
+				break;
+			case turnBackwards:
+				printf("in choose next direction\n");
+				rotation.rotateBackwards(stopFlag);
+				break;
+		}
 	}
 }
 
-void checkDeadend(atomic<bool> &stopFlag, IntersectionCheckerResult fullResult, BrickPi3 &BP) {
-	printf("in checkDeadend method \n");
-	Rotation rotate(BP);
-	if (fullResult.deadend) {
-		rotate.rotateBackwards(stopFlag);
+// void checkDeadend(atomic<bool> &stopFlag, IntersectionCheckerResult fullResult, BrickPi3 &BP) {
+// 	printf("in checkDeadend method \n");
+// 	Rotation rotate(BP);
+// 	if (fullResult.deadend) {
+// 		rotate.rotateBackwards(stopFlag);
+// 	}
+// }
+
+void returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopFlag) {
+	bool result = map.returnToLastIntersectionLogic();
+	if (result == true) {
+		printf("Scanned the whole labyrinth\n");
+		stopFlag.store(true);
 	}
 }
 
@@ -141,28 +151,28 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	CheckForIntersection checkerThread(stopFlag, checkerFlag, BP);
 
 
-	// while (!stopFlag.load()) {
-	// 	 // break;
-	// 	if (ok) {
-	// 		startMovement(stopFlag, checkerFlag, checkerThread, BP);
-	// 		ok = false;
-	// 	}
-	// 	if (checkerFlag.load()) {
-	// 		IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
-	// 		// IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
-	// 		// if (fullResult.deadend)
-	// 		// 	checkDeadend(stopFlag, fullResult, BP);
-	// 		IntersectionWays result = {false, false, false};
-	// 		addNewIntersectionToMap(map, result);
-	// 		chooseNextDirection(map, stopFlag, BP);
-	// 		stopFlag.store(true);
-	// 	}
-	// }
 
-	// for (int i=0; i<10;i ++) {
-	// 	printf("sensor: %f\n",sensor.returnUltrasonicValue(2));
-	// 	usleep(second);
-	// }
+
+	while (!stopFlag.load()) {
+		 // break;
+		if (ok) {
+			startMovement(stopFlag, checkerFlag, checkerThread, BP);
+			ok = false;
+		}
+		if (checkerFlag.load()) {
+			IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
+			IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
+			if (!returnToLastIntersection) {
+				addNewIntersectionToMap(map, result);
+			}
+			else {
+				returnToLastIntersectionLogic(map, stopFlag);
+			}
+			chooseNextDirection(map, stopFlag, BP);
+			// stopFlag.store(true);
+		}
+	}
+
 
 	// Sensor sensorObj(BP);  // Create Sensor object
 	// SpecialCases specialCases(BP);
@@ -219,7 +229,7 @@ int main(void)
 	BP.set_sensor_type(PORT_4, SENSOR_TYPE_NXT_ULTRASONIC); // left
 	BP.set_sensor_type(PORT_3, SENSOR_TYPE_NXT_ULTRASONIC); // right
 	BP.set_sensor_type(PORT_1, SENSOR_TYPE_EV3_GYRO_ABS_DPS); //
-	BP.set_sensor_type(PORT_2, SENSOR_TYPE_NXT_ULTRASONIC); //
+	BP.set_sensor_type(PORT_2, SENSOR_TYPE_NXT_ULTRASONIC); // forward
 
 
 

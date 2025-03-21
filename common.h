@@ -13,6 +13,8 @@
 
 extern std::mutex bpMutex;
 
+extern bool returnToLastIntersection;
+
 
 struct MotorDetails{
 	uint8_t State;

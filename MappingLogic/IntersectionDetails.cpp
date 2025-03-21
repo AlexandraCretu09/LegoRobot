@@ -51,7 +51,7 @@ void IntersectionDetails::addNewIntersection(IntersectionWays possibleIntersecti
     currentNode = newNode;
 }
 
-void IntersectionDetails::printAllNodes() {
+void IntersectionDetails::printAllParentNodes() {
     intersectionNode *copy = currentNode;
     int x = 1;
     do {
@@ -79,6 +79,15 @@ void IntersectionDetails::printCurrentNode() {
 }
 
 
+void IntersectionDetails::printCurrentNode(intersectionNode *node) {
+    printf("\nPossible directions of chosen node:\n");
+    printf("to the right: %d\n", node->possibleIntersectionWays.right);
+    printf("to the left: %d\n", node->possibleIntersectionWays.left);
+    printf("forward: %d\n", node->possibleIntersectionWays.forward);
+    printf("Direction taken: %d\n\n", node->currentDirection);
+}
+
+
 
 
 direction IntersectionDetails::getCurrentDirection() {
@@ -91,6 +100,7 @@ turnDirection IntersectionDetails::chooseNextDirection() {
 
     switch (currentNode->currentDirection) {
         case nothing:
+            returnToLastIntersection = false;
             if (possibleWays.right) {
                 currentNode->currentDirection = direction::right;
                 return turnRight;
@@ -104,9 +114,11 @@ turnDirection IntersectionDetails::chooseNextDirection() {
                 return turnLeft;
             }
             currentNode->currentDirection = direction::backwards;
+            returnToLastIntersection = true;
             return turnBackwards;
 
         case direction::right:
+            returnToLastIntersection = false;
             if (possibleWays.forward) {
                 currentNode->currentDirection = direction::forward;
                 return turnRight;
@@ -116,18 +128,22 @@ turnDirection IntersectionDetails::chooseNextDirection() {
                 return goStraight;
             }
             currentNode->currentDirection = direction::backwards;
+            returnToLastIntersection = true;
             return turnLeft;
 
         case direction::forward:
             if (possibleWays.left) {
                 currentNode->currentDirection = direction::left;
+                returnToLastIntersection = false;
                 return turnRight;
             }
             currentNode->currentDirection = direction::backwards;
+            returnToLastIntersection = true;
             return goStraight;
 
         case direction::left:
             currentNode->currentDirection = direction::backwards;
+            returnToLastIntersection = true;
             return turnRight;
     }
 }
@@ -143,16 +159,32 @@ IntersectionWays IntersectionDetails::getIntersectionPossibleWays() {
         intersectionWays.forward = true;
     return intersectionWays;
 }
-IntersectionWays IntersectionDetails::getIntersectionVisitedWays() {
-    IntersectionWays intersectionWays;
-    if (currentNode->visitedIntersectionWays.right)
-        intersectionWays.right = true;
-    if (currentNode->visitedIntersectionWays.left)
-        intersectionWays.left = true;
-    if (currentNode->visitedIntersectionWays.forward)
-        intersectionWays.forward = true;
-    return intersectionWays;
+
+bool IntersectionDetails::returnToLastIntersectionLogic() {
+    if (currentNode->parent!=nullptr) {
+        currentNode = currentNode->parent;
+        return false;
+    }
+    return true;
 }
+
+intersectionNode *IntersectionDetails::getRoot(intersectionNode *initialNode) {
+    intersectionNode *current = initialNode;
+    while (current->parent!=nullptr)
+        current = current->parent;
+    return current;
+}
+
+void IntersectionDetails::printAllNodesRecursive(intersectionNode *node) {
+    if (node!=nullptr) {
+        printCurrentNode(node);
+        printAllNodesRecursive(currentNode->right);
+        printAllNodesRecursive(currentNode->forward);
+        printAllNodesRecursive(currentNode->left);
+    }
+}
+
+
 
 
 

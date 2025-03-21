@@ -24,12 +24,17 @@ class IntersectionDetails {
 public:
     IntersectionDetails(int gyroscopeReading);
     void addNewIntersection(IntersectionWays possibleIntersectionWays);
-    void printAllNodes();
+    void printAllParentNodes();
+    void printAllNodes(intersectionNode* node);
     void printCurrentNode();
+    void printCurrentNode(intersectionNode* node);
     turnDirection chooseNextDirection();
     direction getCurrentDirection();
+    bool returnToLastIntersectionLogic();
 private:
+    void printAllNodesRecursive(intersectionNode* node);
     intersectionNode *currentNode;
+    intersectionNode *getRoot(intersectionNode *node);
     IntersectionWays getIntersectionPossibleWays();
     IntersectionWays getIntersectionVisitedWays();
 };
