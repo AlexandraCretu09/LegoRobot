@@ -141,39 +141,40 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	CheckForIntersection checkerThread(stopFlag, checkerFlag, BP);
 
 
-	while (!stopFlag.load()) {
-		 // break;
-		if (ok) {
-			startMovement(stopFlag, checkerFlag, checkerThread, BP);
-			ok = false;
-		}
-		if (checkerFlag.load()) {
-			IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
-			// IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
-			// if (fullResult.deadend)
-			// 	checkDeadend(stopFlag, fullResult, BP);
-			IntersectionWays result = {false, false, false};
-			addNewIntersectionToMap(map, result);
-			chooseNextDirection(map, stopFlag, BP);
-			stopFlag.store(true);
-		}
-	}
+	// while (!stopFlag.load()) {
+	// 	 // break;
+	// 	if (ok) {
+	// 		startMovement(stopFlag, checkerFlag, checkerThread, BP);
+	// 		ok = false;
+	// 	}
+	// 	if (checkerFlag.load()) {
+	// 		IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
+	// 		// IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
+	// 		// if (fullResult.deadend)
+	// 		// 	checkDeadend(stopFlag, fullResult, BP);
+	// 		IntersectionWays result = {false, false, false};
+	// 		addNewIntersectionToMap(map, result);
+	// 		chooseNextDirection(map, stopFlag, BP);
+	// 		stopFlag.store(true);
+	// 	}
+	// }
 
 	// for (int i=0; i<10;i ++) {
 	// 	printf("sensor: %f\n",sensor.returnUltrasonicValue(2));
 	// 	usleep(second);
 	// }
 
+	// Sensor sensorObj(BP);  // Create Sensor object
+	// SpecialCases specialCases(BP);
+	//
+	// specialCases.cornerTrapLeft(sensorObj, BP); // Handle left case
+	//
+	// move.stop();
+	// //gyroMonitor.stopMonitoring();
+	// checkerThread.stopMonitoring();
+	// stopFlag.store(true);
 
-	move.stop();
-	//gyroMonitor.stopMonitoring();
-	checkerThread.stopMonitoring();
-	stopFlag.store(true);
 
-	     // Sensor sensorObj(BP);  // Create Sensor object
-	     // SpecialCases specialCases(BP);
-	     //
-	     // specialCases.cornerTrapRight(sensorObj, BP); // Handle left case
 
 }
 

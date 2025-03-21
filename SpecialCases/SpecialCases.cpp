@@ -9,6 +9,7 @@
 #include "../Movement/rotation.h"
 #include "../Motor/motor.h"
 #include <atomic>
+#include <cmath>
 #include<unistd.h>
 
 
@@ -138,6 +139,7 @@ void SpecialCases::cornerTrapLeft(Sensor &sensorObj, BrickPi3 &BP) {
         rotation.rotateBackwards(stopFlag); // Perform 180° backward rotation
     }
 }
+
 
 
 

@@ -149,60 +149,60 @@ void Rotation::rotateBackwards(std::atomic<bool> &stopFlag) {
 }
 
 
-
-//void rotateBackwards(BrickPi3 BP){
-//	BP.reset_motor_encoder(PORT_B);
-//	BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
+//
+// void rotateBackwards(BrickPi3 BP){
+// 	BP.reset_motor_encoder(PORT_B);
+// 	BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
 //
 //
 //
-//	printf("\nCase Backwards\n");
+// 	printf("\nCase Backwards\n");
 //
-//	while(PositionB > -550){
-//		if(killButton(BP))
-//			break;
-//		BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
-//		printf("PoditionB: %d StateB: %d\n", PositionB, StateB);
-//		setRightWheelSpeed(-15, BP);
-//		setLeftWheelSpeed(-15, BP);
-//	}
+// 	while(PositionB > -550){
+// 		if(killButton(BP))
+// 			break;
+// 		BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
+// 		printf("PoditionB: %d StateB: %d\n", PositionB, StateB);
+// 		setRightWheelSpeed(-15, BP);
+// 		setLeftWheelSpeed(-15, BP);
+// 	}
 //
-//	BP.reset_motor_encoder(PORT_B);
-//	BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
+// 	BP.reset_motor_encoder(PORT_B);
+// 	BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
 //
 //
-//	while(PositionB < 450 || DPSB == 0){
-//		if(killButton(BP))
-//			break;
-//		BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
-//		//printf("PoditionB: %d\n", PositionB);
-//		printf("1st While, DPS: %d\n", DPSB);
-//		setRightWheelSpeed(20, BP);
-//		setLeftWheelSpeed(0, BP);
-//	}
+// 	while(PositionB < 450 || DPSB == 0){
+// 		if(killButton(BP))
+// 			break;
+// 		BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
+// 		//printf("PoditionB: %d\n", PositionB);
+// 		printf("1st While, DPS: %d\n", DPSB);
+// 		setRightWheelSpeed(20, BP);
+// 		setLeftWheelSpeed(0, BP);
+// 	}
 //
-//	BP.reset_motor_encoder(PORT_B);
-//	BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
+// 	BP.reset_motor_encoder(PORT_B);
+// 	BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
 //
-//	BP.reset_motor_encoder(PORT_C);
-//	BP.get_motor_status(PORT_C, StateC, PowerC, PositionC, DPSC);
+// 	BP.reset_motor_encoder(PORT_C);
+// 	BP.get_motor_status(PORT_C, StateC, PowerC, PositionC, DPSC);
 //
-//	while(PositionC > -400 || DPSC == 0){
-//		if(killButton(BP))
-//			break;
-//		printf("2nd While\n");
-//		printf("PoditionC: %d\n", PositionC);
-//		BP.get_motor_status(PORT_C, StateC, PowerC, PositionC, DPSC);
-//		setRightWheelSpeed(0, BP);
-//		setLeftWheelSpeed(-20, BP);
-//	}
+// 	while(PositionC > -400 || DPSC == 0){
+// 		if(killButton(BP))
+// 			break;
+// 		printf("2nd While\n");
+// 		printf("PoditionC: %d\n", PositionC);
+// 		BP.get_motor_status(PORT_C, StateC, PowerC, PositionC, DPSC);
+// 		setRightWheelSpeed(0, BP);
+// 		setLeftWheelSpeed(-20, BP);
+// 	}
 //
-//	BP.reset_motor_encoder(PORT_B);
-//	BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
+// 	BP.reset_motor_encoder(PORT_B);
+// 	BP.get_motor_status(PORT_B, StateB, PowerB, PositionB, DPSB);
 //
-//	setRightWheelSpeed(0, BP);
-//	setLeftWheelSpeed(0, BP);
-//}
+// 	setRightWheelSpeed(0, BP);
+// 	setLeftWheelSpeed(0, BP);
+// }
 
 
 
