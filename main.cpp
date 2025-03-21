@@ -151,6 +151,8 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	CheckForIntersection checkerThread(stopFlag, checkerFlag, BP);
 
 
+
+
 	while (!stopFlag.load()) {
 		 // break;
 		if (ok) {
@@ -172,10 +174,18 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	}
 
 
-	move.stop();
-	//gyroMonitor.stopMonitoring();
-	checkerThread.stopMonitoring();
-	stopFlag.store(true);
+	// Sensor sensorObj(BP);  // Create Sensor object
+	// SpecialCases specialCases(BP);
+	//
+	// specialCases.cornerTrapLeft(sensorObj, BP); // Handle left case
+	//
+	// move.stop();
+	// //gyroMonitor.stopMonitoring();
+	// checkerThread.stopMonitoring();
+	// stopFlag.store(true);
+
+
+
 }
 
 

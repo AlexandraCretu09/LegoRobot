@@ -648,3 +648,12 @@
 //}
 //
 //
+// int main() {
+//     BrickPi3 BP;
+//     Sensor sensorObj(BP);  // Create Sensor object
+//     SpecialCases specialCases(BP);
+//
+//     specialCases.toCloseToTheLeft(sensorObj, BP); // Handle left case
+//
+//     return 0;
+// }
