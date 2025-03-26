@@ -29,14 +29,18 @@ private:
     deque<int> leftSensorBuffer;
     deque<int> rightSensorBuffer;
     IntersectionCheckerResult latestResult = {false, false, false, false, false};
-    static constexpr size_t BUFFER_SIZE = 5;
+    static constexpr size_t BUFFER_SIZE = 3;
 
     bool isMonitoring;
     thread checkForIntersectionThread;
     void checker();
     void updateBuffers(int leftValue, int rightValue);
-    bool checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersection(int leftValue, int rightValue);
-    bool checkCaseWhereRobotIsTooCloseToWallWithTheIntersection(int leftValue, int rightValue);
+    void updateLeftBuffer(int leftValue);
+    void updateRightBuffer(int rightValue);
+    bool checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionLeft(int rightValue);
+    bool checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionRight(int leftValue);
+    bool checkCaseWhereRobotIsTooCloseToWallWithTheIntersectionLeft(int leftValue, int rightValue);
+    bool checkCaseWhereRobotIsTooCloseToWallWithTheIntersectionRight(int leftValue, int rightValue);
 
 };
 #endif //CHECKFORINTERSECTION_H

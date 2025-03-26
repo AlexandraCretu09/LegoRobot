@@ -69,6 +69,11 @@ void IntersectionDetails::printAllParentNodes() {
     } while (copy != nullptr);
 }
 
+void IntersectionDetails::printAllNodes() {
+    intersectionNode *root = getRoot(currentNode);
+    printAllNodesRecursive(root);
+}
+
 void IntersectionDetails::printCurrentNode() {
     intersectionNode *copy = currentNode;
     printf("\nPossible directions of chosen node:\n");
@@ -92,6 +97,7 @@ void IntersectionDetails::printCurrentNode(intersectionNode *node) {
 
 direction IntersectionDetails::getCurrentDirection() {
     return currentNode->currentDirection;
+
 }
 
 turnDirection IntersectionDetails::chooseNextDirection() {

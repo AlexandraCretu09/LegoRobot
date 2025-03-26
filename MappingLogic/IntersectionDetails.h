@@ -25,7 +25,7 @@ public:
     IntersectionDetails(int gyroscopeReading);
     void addNewIntersection(IntersectionWays possibleIntersectionWays);
     void printAllParentNodes();
-    void printAllNodes(intersectionNode* node);
+    void printAllNodes();
     void printCurrentNode();
     void printCurrentNode(intersectionNode* node);
     turnDirection chooseNextDirection();

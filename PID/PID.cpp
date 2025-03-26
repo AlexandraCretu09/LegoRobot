@@ -72,9 +72,9 @@ bool PID::isTooCloseToLeft() {
 	Sensor sensor(BP);
 
 	if(sensor.returnUltrasonicValue(4) <= 7 ) {
-		printf("Left:\n");
-		printf("Left sensor: %f\n", sensor.returnUltrasonicValue(4));
-		printf("Right sensor: %f\n\n", sensor.returnUltrasonicValue(3));
+		// printf("Left:\n");
+		// printf("Left sensor: %f\n", sensor.returnUltrasonicValue(4));
+		// printf("Right sensor: %f\n\n", sensor.returnUltrasonicValue(3));
 		return true;
 	}
 	return false;
@@ -83,9 +83,9 @@ bool PID::isTooCloseToLeft() {
 bool PID::isTooCloseToRight() {
 	Sensor sensor(BP);
 	if(sensor.returnUltrasonicValue(3) <= 7 ) {
-		printf("Right:\n");
-		printf("Left sensor: %f\n", sensor.returnUltrasonicValue(4));
-		printf("Right sensor: %f\n\n", sensor.returnUltrasonicValue(3));
+		// printf("Right:\n");
+		// printf("Left sensor: %f\n", sensor.returnUltrasonicValue(4));
+		// printf("Right sensor: %f\n\n", sensor.returnUltrasonicValue(3));
 		return true;
 	}
 	return false;
@@ -105,11 +105,11 @@ void PID::correctLeft(std::atomic<bool> &stopFlag) {
 	if(stopFlag.load())
 		return;
 	WheelsMovement move(BP);
-	printf("in left correction\n");
+	// printf("in left correction\n");
 	move.moveLeftWheel(255);
 	move.moveRightWheel(245);
 	passTime(2, stopFlag);
-	printf("time has passed for left\n");
+	// printf("time has passed for left\n");
 	antiCorrection(false, stopFlag);
 }
 
@@ -118,11 +118,11 @@ void PID::correctRight(std::atomic<bool> &stopFlag) {
 	if(stopFlag.load())
 		return;
 	WheelsMovement move(BP);
-	printf("in right correction\n");
+	// printf("in right correction\n");
 	move.moveRightWheel(260);
 	move.moveLeftWheel(240);
 	passTime(2, stopFlag);
-	printf("time has passed for right\n");
+	// printf("time has passed for right\n");
 	antiCorrection(true, stopFlag);
 }
 
@@ -133,14 +133,14 @@ void PID::antiCorrection(bool right, atomic<bool>& stopFlag) {
 	if(stopFlag.load())
 		return;
 	if(right) {
-		printf("anticorrection on right\n");
+		// printf("anticorrection on right\n");
 		move.moveRightWheel(248);
 		move.moveLeftWheel(252);
 		passTime(0.5, stopFlag);
 		move.goForward();
 	}
 	else {
-		printf("anticorrection on left\n");
+		// printf("anticorrection on left\n");
 		move.moveRightWheel(252);
 		move.moveLeftWheel(248);
 		passTime(0.5, stopFlag);

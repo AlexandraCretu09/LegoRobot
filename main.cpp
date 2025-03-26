@@ -59,8 +59,10 @@ void printIntersectionResult(IntersectionCheckerResult result) {
 	printf("Intersection on the right: %d\n", result.right );
 	printf("Intersection on the left: %d\n", result.left );
 	printf("Intersection on the forward: %d\n", result.forward );
-	printf("Special case 1: %d\n", result.specialCase1);
-	printf("Special case 2: %d\n", result.specialCase2);
+	// printf("Special case 1 left: %d\n", result.specialCase1Left);
+	// printf("Special case 1 right: %d\n", result.specialCase1Right);
+	// printf("Special case 2 left: %d\n", result.specialCase2Left);
+	// printf("Special case 2 right: %d\n", result.specialCase2Right);
 }
 
 void startMovement(atomic<bool> &stopFlag, atomic<bool> &checkerFlag,
@@ -87,12 +89,11 @@ IntersectionWays convertIntersectionWithSpecialCasesToOnlyWays(IntersectionCheck
 }
 
 void addNewIntersectionToMap(IntersectionDetails &map, IntersectionWays result) {
-
 	map.addNewIntersection(result);
-	map.printAllParentNodes();
+	// map.printAllParentNodes();
 }
 
-void chooseNextDirection(IntersectionDetails map, atomic<bool> &stopFlag, BrickPi3 &BP) {
+void chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, BrickPi3 &BP) {
 	turnDirection nextRotation = map.chooseNextDirection();
 	printf("Next direction should be: %d\n\n", nextRotation);
 	Rotation rotation(BP);
@@ -109,30 +110,24 @@ void chooseNextDirection(IntersectionDetails map, atomic<bool> &stopFlag, BrickP
 				rotation.goStraight(stopFlag);
 				break;
 			case turnBackwards:
-				printf("in choose next direction\n");
 				rotation.rotateBackwards(stopFlag);
 				break;
 		}
 	}
 }
 
-// void checkDeadend(atomic<bool> &stopFlag, IntersectionCheckerResult fullResult, BrickPi3 &BP) {
-// 	printf("in checkDeadend method \n");
-// 	Rotation rotate(BP);
-// 	if (fullResult.deadend) {
-// 		rotate.rotateBackwards(stopFlag);
-// 	}
-// }
-
-void returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopFlag) {
+bool returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopFlag) {
 	bool result = map.returnToLastIntersectionLogic();
 	if (result == true) {
 		printf("Scanned the whole labyrinth\n");
 		stopFlag.store(true);
+		return true;
 	}
+	return false;
 }
 
-
+void executeSpecialCases(IntersectionCheckerResult fullResult, BrickPi3 &BP) {
+}
 
 void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 
@@ -150,7 +145,8 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	bool ok = true;
 	CheckForIntersection checkerThread(stopFlag, checkerFlag, BP);
 
-
+	// Rotation rotate(BP);
+	// rotate.rotateBackwards(stopFlag);
 
 
 	while (!stopFlag.load()) {
@@ -161,30 +157,45 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 		}
 		if (checkerFlag.load()) {
 			IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
+			// executeSpecialCases(fullResult, BP);
 			IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
+			printIntersectionResult(fullResult);
 			if (!returnToLastIntersection) {
 				addNewIntersectionToMap(map, result);
+
 			}
 			else {
-				returnToLastIntersectionLogic(map, stopFlag);
+				if (returnToLastIntersectionLogic(map, stopFlag) == true)
+					break;
 			}
 			chooseNextDirection(map, stopFlag, BP);
 			// stopFlag.store(true);
+			ok = true;
+			checkerFlag.store(false);
 		}
 	}
-
+	// startMovement(stopFlag, checkerFlag, checkerThread, BP);
+	// IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
+	// if (fullResult.specialCase1Left) {
+	// 	printf("Robot is too close to left wall on opposite side of intersection, which is on right\n");
+	// }if (fullResult.specialCase1Right) {
+	// 	printf("Robot is too close to right wall on opposite side of intersection, which is on left\n");
+	// }if (fullResult.specialCase2Left) {
+	// 	printf("Robot is too close to left wall on side of intersection, which is on left\n");
+	// }if (fullResult.specialCase2Right) {
+	// 	printf("Robot is too close to right wall on side of intersection, which is on right\n");
+	// }
 
 	// Sensor sensorObj(BP);  // Create Sensor object
 	// SpecialCases specialCases(BP);
 	//
 	// specialCases.cornerTrapLeft(sensorObj, BP); // Handle left case
 	//
-	// move.stop();
+	move.stop();
 	// //gyroMonitor.stopMonitoring();
-	// checkerThread.stopMonitoring();
-	// stopFlag.store(true);
-
-
+	checkerThread.stopMonitoring();
+	// map.printAllNodes();
+	stopFlag.store(true);
 
 }
 
