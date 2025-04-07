@@ -28,8 +28,10 @@ struct IntersectionCheckerResult {
 	bool left;
 	bool right;
 	bool forward;
-	bool specialCase1;
-	bool specialCase2;
+	bool specialCase1Left;
+	bool specialCase1Right;
+	bool specialCase2Left;
+	bool specialCase2Right;
 	bool deadend;
 };
 

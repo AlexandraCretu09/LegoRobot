@@ -92,8 +92,8 @@ void Rotation::goStraight(std::atomic<bool> &stopFlag) {
 	move.goForward();
 	MotorDetails motorDetailsA = {0};
 	MotorDetails motorDetailsB = {0};
-	while (motorDetailsA.Position<250) {
-		motorDetailsA = motor.getRightMotorStatus();
+	while (!stopFlag.load()) {
+		// motorDetailsA = motor.getRightMotorStatus();
 	}
 	move.stop();
 }
@@ -106,27 +106,27 @@ void Rotation::rotateBackwards(std::atomic<bool> &stopFlag) {
 	WheelsMovement move(BP);
 	bool ok = true;
 
-	printf("\n\n\n\n\n\n\nFirst while\n\n\n\n");
+	// printf("\n\n\n\n\n\n\nFirst while\n\n\n\n");
 	while (motorDetailsB.Position > -450 && !stopFlag.load()) {
 		if (ok) {
 			move.goBackwards(-15);
 			ok = false;
 		}
 		motorDetailsB = motor.getLeftMotorStatus();
-		printf("motor details: %d\n", motorDetailsB.Position);
+		// printf("motor details: %d\n", motorDetailsB.Position);
 	}
 	move.stop();
 	ok = true;
 	motor.resetBothMotorEncoders();
 	motorDetailsA = motor.getRightMotorStatus();
-	printf("\n\n\n\n\n\n\nSecond while\n\n\n\n");
+	// printf("\n\n\n\n\n\n\nSecond while\n\n\n\n");
 	while (motorDetailsA.Position < 450 && !stopFlag.load()) {
 		if (ok){
 			move.moveRightWheel(200);
 			ok = false;
 		}
 		motorDetailsA = motor.getRightMotorStatus();
-		printf("motor details: %d\n", motorDetailsA.Position);
+		// printf("motor details: %d\n", motorDetailsA.Position);
 	}
 
 	move.stop();
@@ -134,14 +134,14 @@ void Rotation::rotateBackwards(std::atomic<bool> &stopFlag) {
 	motor.resetBothMotorEncoders();
 	motorDetailsB = motor.getLeftMotorStatus();
 
-	printf("\n\n\n\n\n\n\nThird while\n\n\n\n");
+	// printf("\n\n\n\n\n\n\nThird while\n\n\n\n");
 	while (motorDetailsB.Position > -350 && !stopFlag.load()) {
 		if (ok) {
 			move.moveLeftWheel(-200);
 			ok = false;
 		}
 		motorDetailsB = motor.getLeftMotorStatus();
-		printf("motor details: %d\n", motorDetailsB.Position);
+		// printf("motor details: %d\n", motorDetailsB.Position);
 	}
 
 	move.stop();
