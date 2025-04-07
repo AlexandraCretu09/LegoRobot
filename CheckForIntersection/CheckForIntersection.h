@@ -10,21 +10,25 @@
 #include <thread>
 
 #include "../common.h"
+class Sensor;
 using namespace std;
 
 
 
 class CheckForIntersection {
 public:
-    CheckForIntersection(atomic<bool> &stopFlag,atomic<bool> &checkerFlag, BrickPi3 &BP);
-    void startMonitoring();
-    void stopMonitoring();
     mutex resultMutex;
     IntersectionCheckerResult getLatestResult();
+    CheckForIntersection(atomic<bool> &stopFlag, atomic<bool> &checkerFlag, atomic<bool> &waiterForIntersectionResult, BrickPi3 &BP);
+    void startMonitoring();
+    void stopMonitoring();
+    void checkUntilRobotPassedIntersection();
+
 
 private:
     atomic <bool> &stopFlag;
     atomic<bool> &checkerFlag;
+    atomic<bool> &waiterForIntersectionResult;
     BrickPi3& BP;
     deque<int> leftSensorBuffer;
     deque<int> rightSensorBuffer;
@@ -41,6 +45,6 @@ private:
     bool checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionRight(int leftValue);
     bool checkCaseWhereRobotIsTooCloseToWallWithTheIntersectionLeft(int leftValue, int rightValue);
     bool checkCaseWhereRobotIsTooCloseToWallWithTheIntersectionRight(int leftValue, int rightValue);
-
+    bool checkSensorValue(int sensorNumber, Sensor sensor);
 };
 #endif //CHECKFORINTERSECTION_H

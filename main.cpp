@@ -93,21 +93,23 @@ void addNewIntersectionToMap(IntersectionDetails &map, IntersectionWays result) 
 	// map.printAllParentNodes();
 }
 
-void chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, BrickPi3 &BP) {
+void chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, CheckForIntersection &checkerThread, BrickPi3 &BP) {
 	turnDirection nextRotation = map.chooseNextDirection();
-	printf("Next direction should be: %d\n\n", nextRotation);
+	// printf("Next direction should be: %d\n\n", nextRotation);
 	Rotation rotation(BP);
 
 	if (!stopFlag.load()) {
 		switch (nextRotation) {
 			case turnRight:
 				rotation.rotateRight(stopFlag);
+				checkerThread.checkUntilRobotPassedIntersection();
 				break;
 			case turnLeft:
 				rotation.rotateLeft(stopFlag);
+				checkerThread.checkUntilRobotPassedIntersection();
 				break;
 			case goStraight:
-				rotation.goStraight(stopFlag);
+				checkerThread.checkUntilRobotPassedIntersection();
 				break;
 			case turnBackwards:
 				rotation.rotateBackwards(stopFlag);
@@ -126,6 +128,7 @@ bool returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopF
 	return false;
 }
 
+
 void executeSpecialCases(IntersectionCheckerResult fullResult, BrickPi3 &BP) {
 }
 
@@ -142,35 +145,41 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	IntersectionDetails map(sensor.returnGyroValue());
 
 	atomic<bool> checkerFlag(false);
+	atomic<bool> waiterForIntersectionResult(false);
 	bool ok = true;
-	CheckForIntersection checkerThread(stopFlag, checkerFlag, BP);
-
-	// Rotation rotate(BP);
-	// rotate.rotateBackwards(stopFlag);
-
+	bool countStop = false;
+	CheckForIntersection checkerThread(stopFlag, checkerFlag,waiterForIntersectionResult, BP);
 
 	while (!stopFlag.load()) {
-		 // break;
+		 //break;
 		if (ok) {
+			waiterForIntersectionResult.store(false);
 			startMovement(stopFlag, checkerFlag, checkerThread, BP);
 			ok = false;
 		}
 		if (checkerFlag.load()) {
+			while (waiterForIntersectionResult.load() == false)
+				if (!countStop) {
+					move.stop();
+					countStop = true;
+				}
 			IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
 			// executeSpecialCases(fullResult, BP);
 			IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
 			printIntersectionResult(fullResult);
 			if (!returnToLastIntersection) {
+				printf("Adding a new intersection..\n");
 				addNewIntersectionToMap(map, result);
 
 			}
 			else {
+				printf("Returning to last intersection..\n");
 				if (returnToLastIntersectionLogic(map, stopFlag) == true)
 					break;
 			}
-			chooseNextDirection(map, stopFlag, BP);
-			// stopFlag.store(true);
+			chooseNextDirection(map, stopFlag,checkerThread, BP);
 			ok = true;
+			countStop = false;
 			checkerFlag.store(false);
 		}
 	}

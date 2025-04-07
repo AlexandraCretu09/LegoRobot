@@ -92,8 +92,8 @@ void Rotation::goStraight(std::atomic<bool> &stopFlag) {
 	move.goForward();
 	MotorDetails motorDetailsA = {0};
 	MotorDetails motorDetailsB = {0};
-	while (motorDetailsA.Position<250) {
-		motorDetailsA = motor.getRightMotorStatus();
+	while (!stopFlag.load()) {
+		// motorDetailsA = motor.getRightMotorStatus();
 	}
 	move.stop();
 }
