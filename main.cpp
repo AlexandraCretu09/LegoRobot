@@ -98,7 +98,7 @@ void chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, Check
 	// printf("Next direction should be: %d\n\n", nextRotation);
 	Rotation rotation(BP);
 
-	if (!stopFlag.load()) {
+	// if (!stopFlag.load()) {
 		switch (nextRotation) {
 			case turnRight:
 				rotation.rotateRight(stopFlag);
@@ -115,7 +115,7 @@ void chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, Check
 				rotation.rotateBackwards(stopFlag);
 				break;
 		}
-	}
+	// }
 }
 
 bool returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopFlag) {
@@ -130,19 +130,27 @@ bool returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopF
 
 
 void executeSpecialCases(IntersectionCheckerResult fullResult, BrickPi3 &BP) {
+	if (fullResult.specialCase1Left) {
+		printf("Robot is too close to left wall on opposite side of intersection, which is on right\n");
+	}if (fullResult.specialCase1Right) {
+		printf("Robot is too close to right wall on opposite side of intersection, which is on left\n");
+	}if (fullResult.specialCase2Left) {
+		printf("Robot is too close to left wall on side of intersection, which is on left\n");
+	}if (fullResult.specialCase2Right) {
+		printf("Robot is too close to right wall on side of intersection, which is on right\n");
+	}
 }
 
 void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 	Motor motor(BP);
 	WheelsMovement move(BP);
-	Sensor sensor(BP);
 
 	printf("Reset encoders\n");
 	motor.resetBothMotorEncoders();
 
 	usleep(second);
-	IntersectionDetails map(sensor.returnGyroValue());
+	IntersectionDetails map{};
 
 	atomic<bool> checkerFlag(false);
 	atomic<bool> waiterForIntersectionResult(false);
@@ -151,7 +159,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	CheckForIntersection checkerThread(stopFlag, checkerFlag,waiterForIntersectionResult, BP);
 
 	while (!stopFlag.load()) {
-		 //break;
+		// break;
 		if (ok) {
 			waiterForIntersectionResult.store(false);
 			startMovement(stopFlag, checkerFlag, checkerThread, BP);
@@ -164,7 +172,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 					countStop = true;
 				}
 			IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
-			// executeSpecialCases(fullResult, BP);
+			executeSpecialCases(fullResult, BP);
 			IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
 			printIntersectionResult(fullResult);
 			if (!returnToLastIntersection) {
@@ -183,17 +191,13 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 			checkerFlag.store(false);
 		}
 	}
-	// startMovement(stopFlag, checkerFlag, checkerThread, BP);
-	// IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
-	// if (fullResult.specialCase1Left) {
-	// 	printf("Robot is too close to left wall on opposite side of intersection, which is on right\n");
-	// }if (fullResult.specialCase1Right) {
-	// 	printf("Robot is too close to right wall on opposite side of intersection, which is on left\n");
-	// }if (fullResult.specialCase2Left) {
-	// 	printf("Robot is too close to left wall on side of intersection, which is on left\n");
-	// }if (fullResult.specialCase2Right) {
-	// 	printf("Robot is too close to right wall on side of intersection, which is on right\n");
-	// }
+
+
+
+
+
+
+
 
 	// Sensor sensorObj(BP);  // Create Sensor object
 	// SpecialCases specialCases(BP);
