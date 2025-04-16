@@ -158,6 +158,8 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	atomic<bool> waiterForIntersectionResult(false);
 	bool ok = true;
 	bool countStop = false;
+	bool stopIntersectionCheckerThread = false;
+
 
 	CheckForIntersection checkerThread(stopFlag, checkerFlag,waiterForIntersectionResult, BP);
 	MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
@@ -170,14 +172,19 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 			startMovement(stopFlag, checkerFlag, checkerThread, checkerForFrontBlock, monitorIfStuckThread, BP);
 			ok = false;
 		}
+		if (checkerForFrontBlock.load()) {
+
+			monitorIfStuckThread.stopMonitoring();
+			printf("Entered front end blockage\n");
+			move.goBackwards(-200);
+			checkerForFrontBlock.store(false);
+			stopFlag.store(false);
+			stopIntersectionCheckerThread = true;
+			// ok = true;
+		}
+
 		if (checkerFlag.load()) {
-			if (checkerForFrontBlock.load()) {
-				checkerThread.stopMonitoring();
-				printf("Entered front end blockage\n");
-				move.goBackwards(-200);
-				checkerForFrontBlock.store(false);
-				stopFlag.store(false);
-			}
+
 
 			// printf("Exited front end blockage\n");
 			while (waiterForIntersectionResult.load() == false) {
@@ -205,6 +212,10 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 			ok = true;
 			countStop = false;
 			checkerFlag.store(false);
+			stopIntersectionCheckerThread = false;
+		}
+		if (stopIntersectionCheckerThread) {
+			checkerThread.stopMonitoring();
 		}
 	}
 

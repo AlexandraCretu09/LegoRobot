@@ -12,6 +12,8 @@
 #include <atomic>
 #include <deque>
 
+using namespace std;
+
 class PID{
 public:
     PID(atomic<bool> &stopFlag, atomic<bool> &checkerFlag, atomic<bool> &checkerForFrontBlock, BrickPi3 BP);

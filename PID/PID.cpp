@@ -9,16 +9,13 @@
 #include <iostream>
 #include <time.h>
 #include <atomic>
-
-#include "BrickPi3.h"
-#include "../Sensors/getSensorData.h"
-#include "../Motor/motor.h"
-#include "PID.h"
-
 #include <unistd.h>
 
+#include "BrickPi3.h"
+#include "PID.h"
+#include "../Sensors/getSensorData.h"
+#include "../Motor/motor.h"
 #include "../Movement/wheelsMovement.h"
-#include "../MonitorGyroscope/MonitorIfStuck.h"
 
 
 using namespace std;
@@ -34,11 +31,11 @@ void PID::correctPath(){
 	int ct = 1;
 	int ctLeft = 1, ctRight = 1;
 
-	while(!stopFlag.load() ) {
-		if(checkerFlag.load()) {
-			move.stop();
-			break;
-		}
+	while(!stopFlag.load() && !checkerFlag.load() && !checkerForFrontBlock.load()) {
+		// if(checkerFlag.load()) {
+		// 	move.stop();
+		// 	break;
+		// }
 		if(ct == 1) {
 			move.goForward();
 			ct = 0;
@@ -63,7 +60,6 @@ void PID::correctPath(){
 		}
 	}
 
-	// monitorIfStuck.stopMonitoring();
 	move.stop();
 }
 
