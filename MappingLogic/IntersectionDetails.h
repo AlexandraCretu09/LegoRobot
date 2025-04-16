@@ -15,7 +15,6 @@ struct intersectionNode {
     double initialGyroscopeReading;
     direction currentDirection;
     IntersectionWays possibleIntersectionWays;
-    IntersectionWays visitedIntersectionWays;
 };
 
 

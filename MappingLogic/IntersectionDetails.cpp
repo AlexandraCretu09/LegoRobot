@@ -15,7 +15,6 @@ IntersectionDetails::IntersectionDetails() {
     root->parent = nullptr;
     root->currentDirection = direction::forward;
     root->possibleIntersectionWays = {false, false, true};
-    root->visitedIntersectionWays = { false, false, true};
     currentNode = root;
 
 }

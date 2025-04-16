@@ -9,39 +9,35 @@
 #include <iostream>
 #include <time.h>
 #include <atomic>
-
-#include "BrickPi3.h"
-#include "../Sensors/getSensorData.h"
-#include "../Motor/motor.h"
-#include "PID.h"
-
 #include <unistd.h>
 
+#include "BrickPi3.h"
+#include "PID.h"
+#include "../Sensors/getSensorData.h"
+#include "../Motor/motor.h"
 #include "../Movement/wheelsMovement.h"
-#include "../MonitorGyroscope/GyroMonitor.h"
 
 
 using namespace std;
 
-PID::PID(atomic<bool> &checkerFlag, BrickPi3 BP) : checkerFlag(checkerFlag),BP(BP) {
+PID::PID(atomic<bool> &stopFlag, atomic<bool> &checkerFlag,  atomic<bool> &checkerForFrontBlock, BrickPi3 BP) : stopFlag(stopFlag), checkerFlag(checkerFlag),
+	checkerForFrontBlock(checkerForFrontBlock), BP(BP) {
 }
 
 
-void PID::correctPath(atomic<bool> &stopFlag, atomic<bool> &checkerFlag){
+void PID::correctPath(){
 
-	GyroMonitor gyroMonitor(stopFlag, BP);
 	WheelsMovement move(BP);
 	int ct = 1;
 	int ctLeft = 1, ctRight = 1;
 
-	while(!stopFlag.load() ) {
-		if(checkerFlag.load()) {
-			move.stop();
-			return;
-		}
+	while(!stopFlag.load() && !checkerFlag.load() && !checkerForFrontBlock.load()) {
+		// if(checkerFlag.load()) {
+		// 	move.stop();
+		// 	break;
+		// }
 		if(ct == 1) {
 			move.goForward();
-			//gyroMonitor.startMonitoring();
 			ct = 0;
 		}
 		{
@@ -64,7 +60,6 @@ void PID::correctPath(atomic<bool> &stopFlag, atomic<bool> &checkerFlag){
 		}
 	}
 
-	//gyroMonitor.stopMonitoring();
 	move.stop();
 }
 
@@ -147,6 +142,8 @@ void PID::antiCorrection(bool right, atomic<bool>& stopFlag) {
 		move.goForward();
 	}
 }
+
+
 
 
 

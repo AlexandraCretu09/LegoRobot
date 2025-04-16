@@ -18,7 +18,7 @@
 #include "common.h"
 #include "CheckForIntersection/CheckForIntersection.h"
 #include "MappingLogic/IntersectionDetails.h"
-#include "MonitorGyroscope/GyroMonitor.h"
+#include "MonitorGyroscope/MonitorIfStuck.h"
 
 #include "Sensors/getSensorData.h"
 #include "Motor/motor.h"
@@ -65,12 +65,13 @@ void printIntersectionResult(IntersectionCheckerResult result) {
 	// printf("Special case 2 right: %d\n", result.specialCase2Right);
 }
 
-void startMovement(atomic<bool> &stopFlag, atomic<bool> &checkerFlag,
-		CheckForIntersection &checkerThread, BrickPi3 BP) {
+void startMovement(atomic<bool> &stopFlag, atomic<bool> &checkerFlag, CheckForIntersection &checkerThread, atomic<bool> &checkerForFrontBlock,
+	MonitorIfStuck &monitorIfStuckThread, BrickPi3 BP) {
 
 	checkerThread.startMonitoring();
-	PID pid(checkerFlag, BP);
-	pid.correctPath(stopFlag, checkerFlag);
+	monitorIfStuckThread.startMonitoring();
+	PID pid(stopFlag, checkerFlag, checkerForFrontBlock, BP);
+	pid.correctPath();
 }
 
 IntersectionCheckerResult rememberIntersection(atomic<bool> &stopFlag, CheckForIntersection &checkerThread, BrickPi3 BP) {
@@ -153,24 +154,46 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	IntersectionDetails map{};
 
 	atomic<bool> checkerFlag(false);
+	atomic<bool> checkerForFrontBlock(false);
 	atomic<bool> waiterForIntersectionResult(false);
 	bool ok = true;
 	bool countStop = false;
+	bool stopIntersectionCheckerThread = false;
+
+
 	CheckForIntersection checkerThread(stopFlag, checkerFlag,waiterForIntersectionResult, BP);
+	MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
 
 	while (!stopFlag.load()) {
-		// break;
+		 // break;
 		if (ok) {
+			printf("Start moving\n");
 			waiterForIntersectionResult.store(false);
-			startMovement(stopFlag, checkerFlag, checkerThread, BP);
+			startMovement(stopFlag, checkerFlag, checkerThread, checkerForFrontBlock, monitorIfStuckThread, BP);
 			ok = false;
 		}
+		if (checkerForFrontBlock.load()) {
+
+			monitorIfStuckThread.stopMonitoring();
+			printf("Entered front end blockage\n");
+			move.goBackwards(-200);
+			checkerForFrontBlock.store(false);
+			stopFlag.store(false);
+			stopIntersectionCheckerThread = true;
+			// ok = true;
+		}
+
 		if (checkerFlag.load()) {
-			while (waiterForIntersectionResult.load() == false)
+
+
+			// printf("Exited front end blockage\n");
+			while (waiterForIntersectionResult.load() == false) {
+				// printf("In while, waiting for intersection result\n");
 				if (!countStop) {
 					move.stop();
 					countStop = true;
 				}
+			}
 			IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
 			executeSpecialCases(fullResult, BP);
 			IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
@@ -189,14 +212,12 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 			ok = true;
 			countStop = false;
 			checkerFlag.store(false);
+			stopIntersectionCheckerThread = false;
+		}
+		if (stopIntersectionCheckerThread) {
+			checkerThread.stopMonitoring();
 		}
 	}
-
-
-
-
-
-
 
 
 	// Sensor sensorObj(BP);  // Create Sensor object

@@ -37,14 +37,18 @@ private:
 
     bool isMonitoring;
     thread checkForIntersectionThread;
+
+
     void checker();
-    void updateBuffers(int leftValue, int rightValue);
+
     void updateLeftBuffer(int leftValue);
     void updateRightBuffer(int rightValue);
+
     bool checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionLeft(int rightValue);
     bool checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionRight(int leftValue);
     bool checkCaseWhereRobotIsTooCloseToWallWithTheIntersectionLeft(int leftValue, int rightValue);
     bool checkCaseWhereRobotIsTooCloseToWallWithTheIntersectionRight(int leftValue, int rightValue);
+
     bool checkSensorValue(int sensorNumber, Sensor sensor);
 };
 #endif //CHECKFORINTERSECTION_H
