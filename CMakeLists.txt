@@ -11,11 +11,12 @@ add_executable(brick_pi_clion main.cpp
         Movement/rotation.cpp
         Movement/wheelsMovement.cpp
         PID/PID.cpp
+        PID/PID.h
         Sensors/getSensorData.cpp
         common.cpp
         Resource.cpp
-        MonitorGyroscope/GyroMonitor.h
-        MonitorGyroscope/GyroMonitor.cpp
+        MonitorGyroscope/MonitorIfStuck.h
+        MonitorGyroscope/MonitorIfStuck.cpp
         CheckForIntersection/CheckForIntersection.cpp
         CheckForIntersection/CheckForIntersection.h
         SpecialCases/SpecialCases.cpp

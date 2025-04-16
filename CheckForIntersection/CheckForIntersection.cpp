@@ -5,9 +5,11 @@
 #include "CheckForIntersection.h"
 
 #include <atomic>
+#include <set>
 #include <unistd.h>
 
 #include "../Movement/wheelsMovement.h"
+#include "../Motor/motor.h"
 #include "../Sensors/getSensorData.h"
 #include "../common.h"
 
@@ -15,15 +17,22 @@
 using namespace std;
 
 CheckForIntersection::CheckForIntersection(atomic<bool> &stopFlag, atomic<bool> &checkerFlag, atomic<bool> &waiterForIntersectionResult, BrickPi3 &BP)
-    : isMonitoring(false), stopFlag(stopFlag), checkerFlag(checkerFlag), waiterForIntersectionResult(waiterForIntersectionResult) ,BP(BP) {
+    : isMonitoring(false), stopFlag(stopFlag), checkerFlag(checkerFlag), waiterForIntersectionResult(waiterForIntersectionResult), BP(BP) {
 
 }
 
 void CheckForIntersection::checkUntilRobotPassedIntersection() {
     Sensor sensor(BP);
     WheelsMovement move(BP);
+    Motor motor(BP);
+    MotorDetails motorDetails = {};
+
+    motor.resetBothMotorEncoders();
+
     float leftValue;
     float rightValue;
+
+
     printf("in case where both right and left\n");
     leftValue = sensor.returnUltrasonicValue(4);
     rightValue = sensor.returnUltrasonicValue(3);
@@ -36,13 +45,21 @@ void CheckForIntersection::checkUntilRobotPassedIntersection() {
             ok = false;
         }
 
+        // motorDetails = motor.getRightMotorStatus();
+        // if (motorDetails.Position > 250) {
+        //     move.stop();
+        //     break;
+        // }
+
         leftValue = sensor.returnUltrasonicValue(4);
         rightValue = sensor.returnUltrasonicValue(3);
         // printf("left: %.2f, right: %.2f\n", leftValue, rightValue);
 
         retryCount++;
-        if (retryCount > 30000) {
+        if (retryCount > 4500) {
             printf("Timeout: sensor values didn't drop\n");
+            move.stop();
+            move.goBackwards(-150);
             break;
         }
         // usleep(50 * 1000);
@@ -68,7 +85,6 @@ void CheckForIntersection::checker() {
         float leftValue = sensor.returnUltrasonicValue(4);
         float rightValue = sensor.returnUltrasonicValue(3);
         float forwardValue = sensor.returnUltrasonicValue(2);
-
 
 
         if (leftValue < 15) {
@@ -109,7 +125,7 @@ void CheckForIntersection::checker() {
 
         move.goForward(0.25);
 
-        // printf("Finished storing information about intersection\n");
+
         if (result.left || result.right || result.deadend) {
             if (!result.left)
                 result.left = checkSensorValue(4, sensor);
@@ -118,9 +134,12 @@ void CheckForIntersection::checker() {
             if (!result.forward)
             result.forward = checkSensorValue(2, sensor);
 
+            printf("Finished storing information about intersection\n");
+
             waiterForIntersectionResult.store(true);
 
             {
+                // printf("Finished storing result\n");
                 lock_guard<mutex> lock(resultMutex);
                 latestResult = result;
             }
@@ -149,6 +168,8 @@ void CheckForIntersection::updateRightBuffer(int rightValue) {
     }
     rightSensorBuffer.push_back(rightValue);
 }
+
+
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionLeft(int rightValue) {
 
@@ -219,10 +240,6 @@ bool CheckForIntersection::checkSensorValue(int sensorNumber, Sensor sensor) {
         usleep(1000000/32);
     }
     for (int i=0;i<5;i++) {
-        // if (sensorNumber == 4)
-        //     // printf("Values for left sensor: %d\n", sensorValueBuffer[i]);
-        // if (sensorNumber == 3)
-            // printf("Values for right sensor: %d\n", sensorValueBuffer[i]);
         if (sensorValueBuffer [i] > 20) {
             return true;
         }

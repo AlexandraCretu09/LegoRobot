@@ -10,15 +10,21 @@
 
 #include <BrickPi3.h>
 #include <atomic>
+#include <deque>
 
 class PID{
 public:
-    PID(atomic<bool> &checkerFlag, BrickPi3 BP);
+    PID(atomic<bool> &stopFlag, atomic<bool> &checkerFlag, atomic<bool> &checkerForFrontBlock, BrickPi3 BP);
 
-    void correctPath(std::atomic<bool> &stopFlag, atomic<bool> &checkerFlag);
+    void correctPath();
 private:
     BrickPi3 BP;
+    atomic<bool> &stopFlag;
     atomic<bool> &checkerFlag;
+    atomic<bool> &checkerForFrontBlock;
+    static constexpr size_t BUFFER_SIZE = 5;
+
+
     bool isTooCloseToLeft();
     bool isTooCloseToRight();
     void passTime(float seconds, std::atomic<bool>& stopFlag);
