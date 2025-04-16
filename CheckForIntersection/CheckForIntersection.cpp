@@ -41,11 +41,11 @@ void CheckForIntersection::checkUntilRobotPassedIntersection() {
         // printf("left: %.2f, right: %.2f\n", leftValue, rightValue);
 
         retryCount++;
-        if (retryCount > 50) { // timeout after ~5 seconds
+        if (retryCount > 30000) {
             printf("Timeout: sensor values didn't drop\n");
             break;
         }
-        usleep(100 * 1000);
+        // usleep(50 * 1000);
     }
     move.stop();
     printf("exited case where both right and left\n");
@@ -61,6 +61,7 @@ void CheckForIntersection::checker() {
     leftSensorBuffer[1] = 99;
     leftSensorBuffer[2] = 99;
 
+    WheelsMovement move(BP);
     Sensor sensor(BP);
     while(isMonitoring && !stopFlag.load()) {
 
@@ -106,6 +107,7 @@ void CheckForIntersection::checker() {
 
 
 
+        move.goForward(0.25);
 
         // printf("Finished storing information about intersection\n");
         if (result.left || result.right || result.deadend) {

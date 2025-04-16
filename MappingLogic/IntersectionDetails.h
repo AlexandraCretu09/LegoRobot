@@ -22,7 +22,7 @@ struct intersectionNode {
 
 class IntersectionDetails {
 public:
-    IntersectionDetails(int gyroscopeReading);
+    IntersectionDetails();
     void addNewIntersection(IntersectionWays possibleIntersectionWays);
     void printAllParentNodes();
     void printAllNodes();

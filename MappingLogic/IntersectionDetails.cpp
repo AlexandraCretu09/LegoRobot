@@ -7,9 +7,8 @@
 #include "IntersectionDetails.h"
 using namespace std;
 
-IntersectionDetails::IntersectionDetails(int gyroscopeReading) {
+IntersectionDetails::IntersectionDetails() {
     intersectionNode *root = new intersectionNode();
-    root->initialGyroscopeReading = gyroscopeReading;
     root->forward = nullptr;
     root->left = nullptr;
     root->right = nullptr;

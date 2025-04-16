@@ -29,7 +29,7 @@ void Rotation::rotateLeft(atomic<bool> &stopFlag){
 	WheelsMovement move(BP);
 	bool ok = false;
 
-	move.goBackwards(-150);
+	move.goBackwards(-200);
 
 	motor.resetBothMotorEncoders();
 
