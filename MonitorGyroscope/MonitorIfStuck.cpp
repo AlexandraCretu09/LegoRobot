@@ -8,6 +8,7 @@
 
 #include "MonitorIfStuck.h"
 
+#include <algorithm>
 #include <atomic>
 
 #include "../Sensors/getSensorData.h"
@@ -36,7 +37,7 @@ int MonitorIfStuck::getFrontSensorReading() {
 }
 
 void MonitorIfStuck::monitorGyroAndFrontSensor() {
-    printf("Started monitor thread\n");
+    printf("\nStarted monitor thread\n");
     int count = 0;
     while(isMonitoring && !stopFlag.load()) {
         int gyroValue = getGyroscopeReading();
@@ -44,12 +45,13 @@ void MonitorIfStuck::monitorGyroAndFrontSensor() {
 
         updateFrontBuffer(gyroValue);
         updateGyroBuffer(frontValue);
+        count++;
 
         if (count >= BUFFER_SIZE) {
-            if(isRobotStuckByGyro() || isRobotIsStuckByFrontWall()) {
+            // printf("Counter bigger than buffer size\n");
+            if(/*isRobotStuckByGyro() ||*/ isRobotIsStuckByFrontWall()) {
                 stopFlag.store(true);
                 checkerForFrontBlock.store(true);
-                printf("Robot might be stuck!\n");
             }
         }
 
@@ -80,45 +82,51 @@ bool MonitorIfStuck::isRobotStuckByGyro() {
 
 
 bool MonitorIfStuck::isRobotIsStuckByFrontWall() {
-    const int LOW_STUCK_ZONE = 5;
+    const int LOW_STUCK_ZONE = -999;
     const int HIGH_STUCK_ZONE = 35;
+
     const int STUCK_ZONE_MIN_COUNT = 8;
-    const int MIN_UNIQUE_VALUES = 4;
+
     const int REQUIRED_DECREASING_COUNT = 2;
-    const int MAX_VALID_DISTANCE = 100;
+    const int MIN_VALID_DISTANCE = 0;
+    const int MAX_VALID_DISTANCE = 200;
+
+    const int MIN_DECREASE_DELTA = 3;
 
     int stuckZoneCount = 0;
     int decreasingCount = 0;
-    set<int> uniqueValues;
 
     for (int i = 1; i < BUFFER_SIZE; i++) {
         int current = frontSensorBuffer[i];
         int prev = frontSensorBuffer[i - 1];
 
-        if (current > MAX_VALID_DISTANCE) {
+        if (current < MIN_VALID_DISTANCE || current > MAX_VALID_DISTANCE) {
+            stuckZoneCount++;
             continue;
+        }
+        if (prev < MIN_VALID_DISTANCE || prev > MAX_VALID_DISTANCE) {
+            prev = current;
         }
         if (current >= LOW_STUCK_ZONE && current <= HIGH_STUCK_ZONE) {
             stuckZoneCount++;
         }
-        if (current < prev && current < MAX_VALID_DISTANCE && prev < MAX_VALID_DISTANCE) {
+
+        if (prev - current >= MIN_DECREASE_DELTA) {
             decreasingCount++;
+        } else {
+            decreasingCount = 0;
         }
-        if (current <= MAX_VALID_DISTANCE) {
-            uniqueValues.insert(current);
-        }
+
     }
 
-    // for (int i = 0; i < BUFFER_SIZE_FRONT; i++) {
-    //     printf("Front sensor values: %d\n", frontSensorBuffer[i]);
-    // }
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        printf("Front sensor values: %d\n", frontSensorBuffer[i]);
+    }
 
     if (stuckZoneCount >= STUCK_ZONE_MIN_COUNT) {
         if (decreasingCount < REQUIRED_DECREASING_COUNT) {
-            if (uniqueValues.size() <= MIN_UNIQUE_VALUES) {
-                printf("Robot is stuck: repeated low values and no clear movement.\n");
-                return true;
-            }
+            printf("Robot is stuck: repeated low values and no clear movement.\n");
+            return true;
         }
     }
     return false;
