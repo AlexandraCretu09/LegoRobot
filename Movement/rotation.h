@@ -17,7 +17,6 @@ public:
 	void rotateRight( std::atomic<bool> &stopFlag);
 	void rotateLeft( std::atomic<bool> &stopFlag);
 	void rotateBackwards(std::atomic<bool> &stopFlag);
-	void goStraight(std::atomic<bool> &stopFlag);
 private:
 	BrickPi3 BP;
 };

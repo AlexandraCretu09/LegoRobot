@@ -99,24 +99,22 @@ void chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, Check
 	// printf("Next direction should be: %d\n\n", nextRotation);
 	Rotation rotation(BP);
 
-	// if (!stopFlag.load()) {
-		switch (nextRotation) {
-			case turnRight:
-				rotation.rotateRight(stopFlag);
-				checkerThread.checkUntilRobotPassedIntersection();
-				break;
-			case turnLeft:
-				rotation.rotateLeft(stopFlag);
-				checkerThread.checkUntilRobotPassedIntersection();
-				break;
-			case goStraight:
-				checkerThread.checkUntilRobotPassedIntersection();
-				break;
-			case turnBackwards:
-				rotation.rotateBackwards(stopFlag);
-				break;
-		}
-	// }
+	switch (nextRotation) {
+		case turnRight:
+			rotation.rotateRight(stopFlag);
+			checkerThread.checkUntilRobotPassedIntersection();
+			break;
+		case turnLeft:
+			rotation.rotateLeft(stopFlag);
+			checkerThread.checkUntilRobotPassedIntersection();
+			break;
+		case goStraight:
+			checkerThread.checkUntilRobotPassedIntersection();
+			break;
+		case turnBackwards:
+			rotation.rotateBackwards(stopFlag);
+			break;
+	}
 }
 
 bool returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopFlag) {
@@ -146,6 +144,9 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 	Motor motor(BP);
 	WheelsMovement move(BP);
+	Sensor sensor(BP);
+
+	printf("Test gyro: %f\n", sensor.returnGyroValue());
 
 	printf("Reset encoders\n");
 	motor.resetBothMotorEncoders();
@@ -156,7 +157,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	atomic<bool> checkerFlag(false);
 	atomic<bool> checkerForFrontBlock(false);
 	atomic<bool> waiterForIntersectionResult(false);
-	bool ok = true;
+	bool okStartPID = true;
 	bool countStop = false;
 	bool stopIntersectionCheckerThread = false;
 
@@ -165,28 +166,26 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
 
 	while (!stopFlag.load()) {
-		 // break;
-		if (ok) {
+		//break;
+		if (okStartPID) {
 			printf("Start moving\n");
 			waiterForIntersectionResult.store(false);
 			startMovement(stopFlag, checkerFlag, checkerThread, checkerForFrontBlock, monitorIfStuckThread, BP);
-			ok = false;
+			okStartPID = false;
 		}
+		monitorIfStuckThread.stopMonitoring();
 		if (checkerForFrontBlock.load()) {
 
-			monitorIfStuckThread.stopMonitoring();
 			printf("Entered front end blockage\n");
 			move.goBackwards(-200);
 			checkerForFrontBlock.store(false);
 			stopFlag.store(false);
 			stopIntersectionCheckerThread = true;
-			// ok = true;
+			okStartPID = true;
 		}
 
 		if (checkerFlag.load()) {
-
-
-			// printf("Exited front end blockage\n");
+			printf("Exited front end blockage\n");
 			while (waiterForIntersectionResult.load() == false) {
 				// printf("In while, waiting for intersection result\n");
 				if (!countStop) {
@@ -209,7 +208,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 					break;
 			}
 			chooseNextDirection(map, stopFlag,checkerThread, BP);
-			ok = true;
+			okStartPID = true;
 			countStop = false;
 			checkerFlag.store(false);
 			stopIntersectionCheckerThread = false;
@@ -218,6 +217,12 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 			checkerThread.stopMonitoring();
 		}
 	}
+	// int ctx = 0;
+	// while(ctx < 30) {
+	// 	printf("Sensor values: %f\n", sensor.returnUltrasonicValue(2));
+	// 	ctx++;
+	// 	usleep(second/2);
+	// }
 
 
 	// Sensor sensorObj(BP);  // Create Sensor object

@@ -48,7 +48,7 @@ void Rotation::rotateLeft(atomic<bool> &stopFlag){
 		if(stopFlag)
 			break;
 		}
-	move.goForward(1.5);
+	// move.goForward(1.5);
 	move.stop();
 }
 
@@ -82,19 +82,7 @@ void Rotation::rotateRight(atomic<bool> &stopFlag){
 		if(stopFlag)
 			break;
 		}
-	move.goForward(1.5);
-	move.stop();
-}
-
-void Rotation::goStraight(std::atomic<bool> &stopFlag) {
-	WheelsMovement move(BP);
-	Motor motor(BP);
-	move.goForward();
-	MotorDetails motorDetailsA = {0};
-	MotorDetails motorDetailsB = {0};
-	while (!stopFlag.load()) {
-		// motorDetailsA = motor.getRightMotorStatus();
-	}
+	// move.goForward(1.5);
 	move.stop();
 }
 
