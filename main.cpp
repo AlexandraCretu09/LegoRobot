@@ -99,24 +99,22 @@ void chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, Check
 	// printf("Next direction should be: %d\n\n", nextRotation);
 	Rotation rotation(BP);
 
-	// if (!stopFlag.load()) {
-		switch (nextRotation) {
-			case turnRight:
-				rotation.rotateRight(stopFlag);
-				checkerThread.checkUntilRobotPassedIntersection();
-				break;
-			case turnLeft:
-				rotation.rotateLeft(stopFlag);
-				checkerThread.checkUntilRobotPassedIntersection();
-				break;
-			case goStraight:
-				checkerThread.checkUntilRobotPassedIntersection();
-				break;
-			case turnBackwards:
-				rotation.rotateBackwards(stopFlag);
-				break;
-		}
-	// }
+	switch (nextRotation) {
+		case turnRight:
+			rotation.rotateRight(stopFlag);
+			checkerThread.checkUntilRobotPassedIntersection();
+			break;
+		case turnLeft:
+			rotation.rotateLeft(stopFlag);
+			checkerThread.checkUntilRobotPassedIntersection();
+			break;
+		case goStraight:
+			checkerThread.checkUntilRobotPassedIntersection();
+			break;
+		case turnBackwards:
+			rotation.rotateBackwards(stopFlag);
+			break;
+	}
 }
 
 bool returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopFlag) {
