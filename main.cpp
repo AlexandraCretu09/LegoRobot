@@ -101,6 +101,7 @@ void chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, Check
 
 	switch (nextRotation) {
 		case turnRight:
+
 			rotation.rotateRight(stopFlag);
 			checkerThread.checkUntilRobotPassedIntersection();
 			break;
@@ -118,7 +119,8 @@ void chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, Check
 }
 
 bool returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopFlag) {
-	bool result = map.returnToLastIntersectionLogic();
+	map.returnToLastIntersectionLogic();
+	bool result = map.checkIfNodeIsRoot();
 	if (result == true) {
 		printf("Scanned the whole labyrinth\n");
 		stopFlag.store(true);
@@ -166,7 +168,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
 
 	while (!stopFlag.load()) {
-		//break;
+		// break;
 		if (okStartPID) {
 			printf("Start moving\n");
 			waiterForIntersectionResult.store(false);
@@ -176,46 +178,53 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 		monitorIfStuckThread.stopMonitoring();
 		if (checkerForFrontBlock.load()) {
 
-			printf("Entered front end blockage\n");
-			move.goBackwards(-200);
+			// printf("Entered front end blockage\n");
+			move.goBackwards(-250);
 			checkerForFrontBlock.store(false);
 			stopFlag.store(false);
 			stopIntersectionCheckerThread = true;
-			okStartPID = true;
+
 		}
-
-		if (checkerFlag.load()) {
-			printf("Exited front end blockage\n");
-			while (waiterForIntersectionResult.load() == false) {
-				// printf("In while, waiting for intersection result\n");
-				if (!countStop) {
-					move.stop();
-					countStop = true;
+		// else {
+			if (checkerFlag.load()) {
+				// printf("Exited front end blockage\n");
+				while (waiterForIntersectionResult.load() == false) {
+					// printf("In while, waiting for intersection result\n");
+					if (!countStop) {
+						move.stop();
+						countStop = true;
+					}
 				}
-			}
-			IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
-			executeSpecialCases(fullResult, BP);
-			IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
-			printIntersectionResult(fullResult);
-			if (!returnToLastIntersection) {
-				printf("Adding a new intersection..\n");
-				addNewIntersectionToMap(map, result);
+				IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
+				executeSpecialCases(fullResult, BP);
+				IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
+				printIntersectionResult(fullResult);
+				if (!returnToLastIntersection) {
+					printf("Adding a new intersection..\n");
+					addNewIntersectionToMap(map, result);
 
-			}
-			else {
-				printf("Returning to last intersection..\n");
-				if (returnToLastIntersectionLogic(map, stopFlag) == true)
-					break;
-			}
-			chooseNextDirection(map, stopFlag,checkerThread, BP);
-			okStartPID = true;
-			countStop = false;
-			checkerFlag.store(false);
-			stopIntersectionCheckerThread = false;
+				}
+				else {
+					printf("Returning to last intersection..\n");
+					bool finishedLabyrinth = returnToLastIntersectionLogic(map, stopFlag);
+					map.printCurrentNode();
+					if (finishedLabyrinth == true) {
+						break;
+					}
+
+				}
+				chooseNextDirection(map, stopFlag,checkerThread, BP);
+				okStartPID = true;
+				countStop = false;
+				checkerFlag.store(false);
+				stopIntersectionCheckerThread = false;
+			// }
 		}
 		if (stopIntersectionCheckerThread) {
 			checkerThread.stopMonitoring();
+			okStartPID = true;
 		}
+
 	}
 	// int ctx = 0;
 	// while(ctx < 30) {

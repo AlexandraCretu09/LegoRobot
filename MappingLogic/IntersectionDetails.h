@@ -30,6 +30,7 @@ public:
     turnDirection chooseNextDirection();
     direction getCurrentDirection();
     bool returnToLastIntersectionLogic();
+    bool checkIfNodeIsRoot();
 private:
     void printAllNodesRecursive(intersectionNode* node);
     intersectionNode *currentNode;
