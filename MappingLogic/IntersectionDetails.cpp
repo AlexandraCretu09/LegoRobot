@@ -172,6 +172,14 @@ bool IntersectionDetails::returnToLastIntersectionLogic() {
     return true;
 }
 
+bool IntersectionDetails::checkIfNodeIsRoot() {
+    if (currentNode->parent!=nullptr) {
+        return false;
+    }
+    return true;
+}
+
+
 intersectionNode *IntersectionDetails::getRoot(intersectionNode *initialNode) {
     intersectionNode *current = initialNode;
     while (current->parent!=nullptr)

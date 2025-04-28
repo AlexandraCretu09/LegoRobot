@@ -23,6 +23,8 @@ Rotation::Rotation(BrickPi3 BP) : BP(BP) {}
 
 void Rotation::rotateLeft(atomic<bool> &stopFlag){
 
+	// printf("In rotate left\n");
+
 
 	Motor motor(BP);
 	MotorDetails motorDetails = {};
@@ -50,12 +52,13 @@ void Rotation::rotateLeft(atomic<bool> &stopFlag){
 		}
 	// move.goForward(1.5);
 	move.stop();
+	//printf("finished rotate left\n");
 }
 
 
 void Rotation::rotateRight(atomic<bool> &stopFlag){
 
-
+	//printf("In rotate right\n");
 	Motor motor(BP);
 	MotorDetails motorDetails = {0};
 	WheelsMovement move(BP);
@@ -84,10 +87,14 @@ void Rotation::rotateRight(atomic<bool> &stopFlag){
 		}
 	// move.goForward(1.5);
 	move.stop();
+	//printf("finished rotate right\n");
+
 }
 
 
 void Rotation::rotateBackwards(std::atomic<bool> &stopFlag) {
+	//printf("In rotate backwards\n");
+
 	Motor motor(BP);
 	MotorDetails motorDetailsA = {0};
 	MotorDetails motorDetailsB = {0};
@@ -133,7 +140,7 @@ void Rotation::rotateBackwards(std::atomic<bool> &stopFlag) {
 	}
 
 	move.stop();
-
+	//printf("finished rotate backwards\n");
 }
 
 

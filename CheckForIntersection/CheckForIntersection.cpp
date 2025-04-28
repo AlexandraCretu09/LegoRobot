@@ -38,25 +38,25 @@ void CheckForIntersection::checkUntilRobotPassedIntersection() {
     rightValue = sensor.returnUltrasonicValue(3);
 
     int retryCount = 0;
+    int countLeft = 0, countRight = 0;
     bool ok = true;
-    while ((rightValue > 20 || leftValue > 20) && !stopFlag.load()) {
+    while ((countRight < 3 || countLeft < 3) && !stopFlag.load()) {
         if (ok) {
             move.goForward();
             ok = false;
         }
 
-        // motorDetails = motor.getRightMotorStatus();
-        // if (motorDetails.Position > 250) {
-        //     move.stop();
-        //     break;
-        // }
-
         leftValue = sensor.returnUltrasonicValue(4);
         rightValue = sensor.returnUltrasonicValue(3);
         // printf("left: %.2f, right: %.2f\n", leftValue, rightValue);
 
+        if (rightValue <= 20)
+            countRight++;
+        if (leftValue <= 20)
+            countLeft++;
+
         retryCount++;
-        if (retryCount > 4500) {
+        if (retryCount > 5000) {
             printf("Timeout: sensor values didn't drop\n");
             move.stop();
             move.goBackwards(-150);
@@ -134,7 +134,11 @@ void CheckForIntersection::checker() {
             if (!result.forward)
             result.forward = checkSensorValue(2, sensor);
 
-            printf("Finished storing information about intersection\n");
+            if (result.deadend) {
+                result.forward = result.right = result.left = 0;
+            }
+
+            //printf("Finished storing information about intersection\n");
 
             waiterForIntersectionResult.store(true);
 
