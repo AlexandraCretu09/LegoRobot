@@ -102,7 +102,7 @@ void Rotation::rotateBackwards(std::atomic<bool> &stopFlag) {
 	bool ok = true;
 
 	// printf("\n\n\n\n\n\n\nFirst while\n\n\n\n");
-	while (motorDetailsB.Position > -450 && !stopFlag.load()) {
+	while (motorDetailsB.Position > -470 && !stopFlag.load()) {
 		if (ok) {
 			move.goBackwards(-15);
 			ok = false;
@@ -130,7 +130,7 @@ void Rotation::rotateBackwards(std::atomic<bool> &stopFlag) {
 	motorDetailsB = motor.getLeftMotorStatus();
 
 	// printf("\n\n\n\n\n\n\nThird while\n\n\n\n");
-	while (motorDetailsB.Position > -350 && !stopFlag.load()) {
+	while (motorDetailsB.Position > -390 && !stopFlag.load()) {
 		if (ok) {
 			move.moveLeftWheel(-200);
 			ok = false;

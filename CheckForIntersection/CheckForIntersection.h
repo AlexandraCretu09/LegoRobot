@@ -23,6 +23,8 @@ public:
     void startMonitoring();
     void stopMonitoring();
     void checkUntilRobotPassedIntersection();
+    void checkUntilRobotReachIntersectionAgain();
+    deadendSpecialCases checkIfDeadendPositionIsInASpecialCase();
 
 
 private:
@@ -32,7 +34,7 @@ private:
     BrickPi3& BP;
     deque<int> leftSensorBuffer;
     deque<int> rightSensorBuffer;
-    IntersectionCheckerResult latestResult = {false, false, false, false, false};
+    IntersectionCheckerResult latestResult = {false, false, false, false, false, false, false};
     static constexpr size_t BUFFER_SIZE = 3;
 
     bool isMonitoring;

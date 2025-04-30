@@ -119,9 +119,9 @@ bool MonitorIfStuck::isRobotIsStuckByFrontWall() {
 
     }
 
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        printf("Front sensor values: %d\n", frontSensorBuffer[i]);
-    }
+    // for (int i = 0; i < BUFFER_SIZE; i++) {
+    //     printf("Front sensor values: %d\n", frontSensorBuffer[i]);
+    // }
 
     if (stuckZoneCount >= STUCK_ZONE_MIN_COUNT) {
         if (decreasingCount < REQUIRED_DECREASING_COUNT) {

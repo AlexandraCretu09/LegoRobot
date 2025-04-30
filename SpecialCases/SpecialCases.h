@@ -12,15 +12,15 @@ using namespace std;
 
 class SpecialCases {
 public:
-    SpecialCases(BrickPi3 BP);
-    void toCloseToTheRight(Sensor &sensorObj,BrickPi3 &BP);
-    void toCloseToTheLeft(Sensor &sensorObj,BrickPi3 &BP);
-    void frontBlocked(Sensor &sensorObj,BrickPi3 &BP);
-    void cornerTrapRight(Sensor &sensorObj, BrickPi3 &BP);
-    void cornerTrapLeft(Sensor &sensorObj, BrickPi3 &BP);
+    SpecialCases(BrickPi3 &BP);
+    void toCloseToTheRight();
+    void toCloseToTheLeft();
+    void frontBlocked(Sensor &sensorObj);
+    void cornerTrapRight(Sensor &sensorObj);
+    void cornerTrapLeft(Sensor &sensorObj);
 
 private:
-    BrickPi3 BP;
+    BrickPi3 &BP;
 };
 
 

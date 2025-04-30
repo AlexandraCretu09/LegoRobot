@@ -29,13 +29,9 @@ void CheckForIntersection::checkUntilRobotPassedIntersection() {
 
     motor.resetBothMotorEncoders();
 
-    float leftValue;
-    float rightValue;
-
+    float leftValue, rightValue;
 
     printf("in case where both right and left\n");
-    leftValue = sensor.returnUltrasonicValue(4);
-    rightValue = sensor.returnUltrasonicValue(3);
 
     int retryCount = 0;
     int countLeft = 0, countRight = 0;
@@ -50,9 +46,9 @@ void CheckForIntersection::checkUntilRobotPassedIntersection() {
         rightValue = sensor.returnUltrasonicValue(3);
         // printf("left: %.2f, right: %.2f\n", leftValue, rightValue);
 
-        if (rightValue <= 20)
+        if (rightValue <= 15)
             countRight++;
-        if (leftValue <= 20)
+        if (leftValue <= 15)
             countLeft++;
 
         retryCount++;
@@ -66,6 +62,74 @@ void CheckForIntersection::checkUntilRobotPassedIntersection() {
     }
     move.stop();
     printf("exited case where both right and left\n");
+
+}
+
+deadendSpecialCases CheckForIntersection::checkIfDeadendPositionIsInASpecialCase() {
+    Sensor sensor(BP);
+    deadendSpecialCases result = {false, false};
+    int countLeft = 0, countRight = 0, overallCounter=0;
+    while (overallCounter < 3 && !stopFlag.load()) {
+        if (sensor.returnUltrasonicValue(4) < 7) {
+            countLeft++;
+        }
+        if (sensor.returnUltrasonicValue(3) < 7) {
+            countRight++;
+        }
+        overallCounter++;
+    }
+    if (countLeft) {
+        result.tooCloseToTheLeftWall = true;
+    }
+    if (countRight) {
+        result.tooCloseToTheRightWall = true;
+    }
+    return result;
+
+}
+
+
+void CheckForIntersection::checkUntilRobotReachIntersectionAgain() {
+    Sensor sensor(BP);
+    WheelsMovement move(BP);
+    Motor motor(BP);
+    MotorDetails motorDetails = {};
+
+    motor.resetBothMotorEncoders();
+
+    float leftValue, rightValue;
+
+
+    printf("\nin case where robot has to reach intersection\n");
+    int retryCount = 0;
+    int countLeft = 0, countRight = 0;
+    bool ok = true;
+    while (countRight < 3 && countLeft < 3 && !stopFlag.load()) {
+        if (ok) {
+            move.goForward();
+            ok = false;
+        }
+
+        leftValue = sensor.returnUltrasonicValue(4);
+        rightValue = sensor.returnUltrasonicValue(3);
+        // printf("left: %.2f, right: %.2f\n", leftValue, rightValue);
+
+        if (rightValue > 15)
+            countRight++;
+        if (leftValue > 15)
+            countLeft++;
+
+        retryCount++;
+        if (retryCount > 4500) {
+            printf("Timeout: sensor values didn't drop\n");
+            move.stop();
+            move.goBackwards(-150);
+            break;
+        }
+        // usleep(50 * 1000);
+    }
+    move.stop();
+    printf("exited case where robot has to reach intersection\n");
 
 }
 
@@ -176,7 +240,6 @@ void CheckForIntersection::updateRightBuffer(int rightValue) {
 
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionLeft(int rightValue) {
-
     if(rightValue > 20) {
         if(leftSensorBuffer[1] <= 7 && leftSensorBuffer[2] <= 7) {
             return true;
@@ -217,7 +280,7 @@ IntersectionCheckerResult CheckForIntersection::getLatestResult() {
     lock_guard<mutex> lock(resultMutex);
     // printf("left sensor buffer: 1: %d, 2: %d\n", leftSensorBuffer[1], leftSensorBuffer[2]);
     // printf("Right sensor buffer: 1: %d, 2: %d\n", rightSensorBuffer[1], rightSensorBuffer[2]);
-    // printf("Left: %d\n Right: %d\nForward: %d\n\n", latestResult.left, latestResult.right, latestResult.forward);
+    // printf("SP1L: %d\nSP1R: %d\nSP2L: %d\nSP2R:%d\n\n", latestResult.specialCase1Left, latestResult.specialCase1Right, latestResult.specialCase2Left, latestResult.specialCase2Right);
     return latestResult;
 }
 
