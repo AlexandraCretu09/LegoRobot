@@ -41,6 +41,11 @@ struct IntersectionWays {
 	bool forward;
 };
 
+struct deadendSpecialCases {
+	bool tooCloseToTheLeftWall;
+	bool tooCloseToTheRightWall;
+};
+
 enum direction {
 	left,
 	right,

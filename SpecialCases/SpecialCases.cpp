@@ -15,52 +15,48 @@
 
 using namespace std;
 // float second3 = ;
-SpecialCases::SpecialCases(BrickPi3 BP) : BP(BP) {}
+SpecialCases::SpecialCases(BrickPi3 &BP) : BP(BP) {}
 
-void SpecialCases::toCloseToTheRight(Sensor &sensorObj, BrickPi3 &BP) {  // Pass Sensor object as parameter
-    float rightSensor = sensorObj.returnUltrasonicValue(4); // Call function through Sensor object
+void SpecialCases::toCloseToTheRight() {
+    // Pass Sensor object as parameter
+    printf("entered special case where robot is too close to the right\n");
 
-    if (rightSensor <= 6) {  // Too close to the right wall
-        Motor motor(BP);  // Cre1000000.0ate Motor object
+    Motor motor(BP);  // Cre1000000.0ate Motor object
+    WheelsMovement move(BP);
 
-        // Move backward while turning left (right wheel faster)
-        motor.setRightWheelDPS(-250);  // Right wheel moves faster
-        motor.setLeftWheelDPS(-150);   // Left wheel moves slower
-        usleep(1000000.0*1.2);  // Move for 1 second
+    // Move backward while turning left (right wheel faster)
+    motor.setRightWheelDPS(-250);  // Right wheel moves faster
+    motor.setLeftWheelDPS(-150);   // Left wheel moves slower
+    usleep(1000000.0*1.2);  // Move for 1 second
 
-        // Rectify position (left wheel moves faster)
-        motor.setRightWheelDPS(-100);  // Right wheel slower
-        motor.setLeftWheelDPS(-310);   // Left wheel faster
-        usleep(1000000.0/2);
+    // Rectify position (left wheel moves faster)
+    motor.setRightWheelDPS(-100);  // Right wheel slower
+    motor.setLeftWheelDPS(-310);   // Left wheel faster
+    usleep(1000000.0/2);
 
-        // Stop the motors
-        motor.setRightWheelDPS(0);
-        motor.setLeftWheelDPS(0);
-    }
+    move.stop();
 }
-void SpecialCases::toCloseToTheLeft(Sensor &sensorObj, BrickPi3 &BP) {
-    float leftSensor = sensorObj.returnUltrasonicValue(3); // Get left sensor data
+void SpecialCases::toCloseToTheLeft() {
+    printf("entered special case where robot is too close to the left\n");
 
-    if (leftSensor <= 6) {  // Too close to the left wall
-        Motor motor(BP);  // Create Motor object
+    Motor motor(BP);  // Create Motor object
+    WheelsMovement move(BP);
 
-        // Move backward while turning right (left wheel faster)
-        motor.setLeftWheelDPS(-250);   // Left wheel moves faster
-        motor.setRightWheelDPS(-150);  // Right wheel moves slower
-        usleep(1000000.0*1.2);  // Move for 1 second
+    // Move backward while turning right (left wheel faster)
+    motor.setLeftWheelDPS(-250);   // Left wheel moves faster
+    motor.setRightWheelDPS(-150);  // Right wheel moves slower
+    usleep(1000000.0*1.2);  // Move for 1 second
 
-        // Rectify position (right wheel moves faster)
-        motor.setLeftWheelDPS(-100);   // Left wheel slower
-        motor.setRightWheelDPS(-310);  // Right wheel faster
-        usleep(1000000.0/2);  // Move for 0.5 seconds
+    // Rectify position (right wheel moves faster)
+    motor.setLeftWheelDPS(-100);   // Left wheel slower
+    motor.setRightWheelDPS(-310);  // Right wheel faster
+    usleep(1000000.0/2);  // Move for 0.5 seconds
 
-        // Stop the motors
-        motor.setLeftWheelDPS(0);
-        motor.setRightWheelDPS(0);
-    }
+
+    move.stop();
 }
 
-void SpecialCases::frontBlocked(Sensor &sensorObj, BrickPi3 &BP) {
+void SpecialCases::frontBlocked(Sensor &sensorObj) {
     float frontSensor = sensorObj.returnUltrasonicValue(2); // Get front sensor data
 
     if (frontSensor <= 6) {  // Dead end detected
@@ -70,7 +66,7 @@ void SpecialCases::frontBlocked(Sensor &sensorObj, BrickPi3 &BP) {
         rotation.rotateBackwards(stopFlag); // Rotate 180° backward
     }
 }
-void SpecialCases::cornerTrapRight(Sensor &sensorObj, BrickPi3 &BP) {
+void SpecialCases::cornerTrapRight(Sensor &sensorObj) {
     float rightSensor = sensorObj.returnUltrasonicValue(4); // Get right sensor data
     float frontSensor = sensorObj.returnUltrasonicValue(1); // Get front sensor data
     Motor motor(BP);
@@ -105,7 +101,7 @@ void SpecialCases::cornerTrapRight(Sensor &sensorObj, BrickPi3 &BP) {
     }
 }
 
-void SpecialCases::cornerTrapLeft(Sensor &sensorObj, BrickPi3 &BP) {
+void SpecialCases::cornerTrapLeft(Sensor &sensorObj) {
     float leftSensor = sensorObj.returnUltrasonicValue(3); // Get left sensor data
     float frontSensor = sensorObj.returnUltrasonicValue(1); // Get front sensor data
     Motor motor(BP);

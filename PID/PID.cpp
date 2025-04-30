@@ -28,14 +28,11 @@ PID::PID(atomic<bool> &stopFlag, atomic<bool> &checkerFlag,  atomic<bool> &check
 void PID::correctPath(){
 
 	WheelsMovement move(BP);
+	Sensor sensor(BP);
 	int ct = 1;
 	int ctLeft = 1, ctRight = 1;
 
 	while(!stopFlag.load() && !checkerFlag.load() && !checkerForFrontBlock.load()) {
-		// if(checkerFlag.load()) {
-		// 	move.stop();
-		// 	break;
-		// }
 		if(ct == 1) {
 			move.goForward();
 			ct = 0;

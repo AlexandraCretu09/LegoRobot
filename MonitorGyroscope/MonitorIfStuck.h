@@ -35,6 +35,7 @@ private:
     int getFrontSensorReading();
 
     void updateFrontBuffer(int frontValue);
+    //void initializeFrontBuffer();
     void updateGyroBuffer(int gyroValue);
     bool isRobotIsStuckByFrontWall();
 

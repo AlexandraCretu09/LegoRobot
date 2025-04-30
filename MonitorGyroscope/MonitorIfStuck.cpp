@@ -39,11 +39,13 @@ int MonitorIfStuck::getFrontSensorReading() {
 void MonitorIfStuck::monitorGyroAndFrontSensor() {
     printf("\nStarted monitor thread\n");
     int count = 0;
+    //initializeFrontBuffer();
     while(isMonitoring && !stopFlag.load()) {
-        int gyroValue = getGyroscopeReading();
+        // int gyroValue = getGyroscopeReading();
         int frontValue = getFrontSensorReading();
 
-        updateFrontBuffer(gyroValue);
+        // updateFrontBuffer(gyroValue);
+        printf("Front sensor values: %d\n", frontValue);
         updateGyroBuffer(frontValue);
         count++;
 
@@ -119,13 +121,17 @@ bool MonitorIfStuck::isRobotIsStuckByFrontWall() {
 
     }
 
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        printf("Front sensor values: %d\n", frontSensorBuffer[i]);
-    }
+
+    // for (int i = 0; i < BUFFER_SIZE; i++) {
+    //     printf("Front sensor values: %d\n", frontSensorBuffer[i]);
+    // }
 
     if (stuckZoneCount >= STUCK_ZONE_MIN_COUNT) {
         if (decreasingCount < REQUIRED_DECREASING_COUNT) {
             printf("Robot is stuck: repeated low values and no clear movement.\n");
+            for (int i = 0; i < BUFFER_SIZE; i++) {
+                printf("Front sensor values: %d\n", frontSensorBuffer[i]);
+            }
             return true;
         }
     }
@@ -147,10 +153,9 @@ void MonitorIfStuck::updateFrontBuffer(int frontValue) {
     frontSensorBuffer.push_back(frontValue);
 }
 
-
 void MonitorIfStuck::startMonitoring() {
     isMonitoring = true;
-    printf("In monitoring\n");
+    printf("Started monitorIfStuckThread\n");
     monitorThread = thread(&MonitorIfStuck::monitorGyroAndFrontSensor, this);
 }
 
