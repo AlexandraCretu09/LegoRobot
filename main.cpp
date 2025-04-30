@@ -149,12 +149,14 @@ void executeSpecialCases(IntersectionCheckerResult fullResult, BrickPi3 &BP) {
 
 void proceedWithSpecialCases(IntersectionCheckerResult fullResult, CheckForIntersection &checkerThread,BrickPi3 &BP) {
 	if (fullResult.deadend) {
+		WheelsMovement move(BP);
 		printf("Realised its in a deadend\n");
 		deadendSpecialCases deadendResult = checkerThread.checkIfDeadendPositionIsInASpecialCase();
 		fullResult.specialCase1Left = deadendResult.tooCloseToTheLeftWall;
 		fullResult.specialCase1Right = deadendResult.tooCloseToTheRightWall;
-		printf("results: Left: %d, right: %d\n", fullResult.specialCase1Left, fullResult.specialCase1Right);
+		// printf("results: Left: %d, right: %d\n", fullResult.specialCase1Left, fullResult.specialCase1Right);
 		executeSpecialCases(fullResult, BP);
+		move.goForward(1.5);
 	}
 	else if (fullResult.specialCase1Left || fullResult.specialCase1Right || fullResult.specialCase2Left || fullResult.specialCase2Right)
 	{
@@ -190,7 +192,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
 
 	while (!stopFlag.load()) {
-		 // break;
+		// break;
 		if (okStartPID) {
 			printf("Start moving\n");
 			waiterForIntersectionResult.store(false);
@@ -236,7 +238,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 			}
 			chooseNextDirection(map, stopFlag,checkerThread, BP);
-			break;
+			// break;
 			okStartPID = true;
 			countStop = false;
 			checkerFlag.store(false);

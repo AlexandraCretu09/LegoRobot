@@ -34,7 +34,6 @@ void SpecialCases::toCloseToTheRight() {
     motor.setLeftWheelDPS(-310);   // Left wheel faster
     usleep(1000000.0/2);
 
-    move.goForward(1.4);
     move.stop();
 }
 void SpecialCases::toCloseToTheLeft() {
@@ -53,7 +52,7 @@ void SpecialCases::toCloseToTheLeft() {
     motor.setRightWheelDPS(-310);  // Right wheel faster
     usleep(1000000.0/2);  // Move for 0.5 seconds
 
-    move.goForward(1.4);
+
     move.stop();
 }
 
