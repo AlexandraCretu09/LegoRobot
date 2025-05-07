@@ -100,9 +100,8 @@ int FileProcessing::readFromFileIfManualOrAuto() {
             return 1;
         perror("Invalid letter\n");
         return -1;
-    } else {
-        perror("No data was read");
     }
+    perror("No data was read");
 
     close(fifo);
     return -1;
