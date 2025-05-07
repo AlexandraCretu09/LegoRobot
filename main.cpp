@@ -283,8 +283,7 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 
 
-int main(void)
-{
+int main(void) {
 	BrickPi3 BP;
 
 	BP.detect(); // Make sure that the BrickPi3 is communicating and that the firmware is compatible with the drivers.
@@ -319,20 +318,25 @@ int main(void)
 
 
 	FileProcessing fileProcessing;
-	fileProcessing.readFromFileIfManualOrAuto();
 
-	return 0;
+	int result = fileProcessing.readFromFileIfManualOrAuto();
+	if ( result == 0 ) {
+		printf("Started manual control of the robot\n");
+	} else if ( result == 1 ) {
 
-	atomic<bool> stopFlag(false);
+		printf("Started autonomous exploration\n");
 
-	Sensor button(BP);
-	thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
+		atomic<bool> stopFlag(false);
+
+		Sensor button(BP);
+		thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
 
 
-	autonomousMazeExploration(stopFlag, BP);
+		autonomousMazeExploration(stopFlag, BP);
 
-	killMonitorThread.join();
+		killMonitorThread.join();
 
-	printf("Program exiting.\n");
+		printf("Program exiting.\n");
+	}
 	return 0;
 }

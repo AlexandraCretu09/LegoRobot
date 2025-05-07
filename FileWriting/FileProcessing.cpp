@@ -94,12 +94,18 @@ int FileProcessing::readFromFileIfManualOrAuto() {
 
     if (bytesRead > 0) {
         printf("Received letter: %c\n", command);
+        if (command=='m')
+            return 0;
+        if (command=='a')
+            return 1;
+        perror("Invalid letter\n");
+        return -1;
     } else {
         perror("No data was read");
     }
 
     close(fifo);
-    return 0;
+    return -1;
 }
 
 
