@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "CheckForIntersection/CheckForIntersection.h"
+#include "FileWriting/FileProcessing.h"
 #include "MappingLogic/IntersectionDetails.h"
 #include "MonitorGyroscope/MonitorIfStuck.h"
 
@@ -32,6 +33,7 @@ using namespace std;
 
 extern mutex bpMutex;
 extern bool returnToLastIntersection;
+extern double distanceTravelled;
 
 bool ok = false;
 float second = 1000000.0;
@@ -166,7 +168,9 @@ void proceedWithSpecialCases(IntersectionCheckerResult fullResult, CheckForInter
 	}
 }
 
-void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
+//ToDo: make it check if its in a special case until it isn't anymore
+
+void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 	Motor motor(BP);
 	WheelsMovement move(BP);
@@ -183,9 +187,12 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	atomic<bool> checkerFlag(false);
 	atomic<bool> checkerForFrontBlock(false);
 	atomic<bool> waiterForIntersectionResult(false);
+
 	bool okStartPID = true;
 	bool countStop = false;
 	bool stopIntersectionCheckerThread = false;
+
+	FileProcessing fileProcessing;
 
 
 	CheckForIntersection checkerThread(stopFlag, checkerFlag,waiterForIntersectionResult, BP);
@@ -223,9 +230,12 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 			IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
 			printIntersectionResult(fullResult);
 
+			bool rememberIfReturnToLastIntersection = returnToLastIntersection;
+
 			if (!returnToLastIntersection) {
 				printf("\nAdding a new intersection..\n");
 				addNewIntersectionToMap(map, result);
+
 
 			}
 			else {
@@ -233,11 +243,17 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 				bool finishedLabyrinth = returnToLastIntersectionLogic(map, stopFlag);
 				// map.printCurrentNode();
 				if (finishedLabyrinth == true) {
+					fileProcessing.writeToFileFinishedLabyrinth();
 					break;
 				}
 
 			}
 			chooseNextDirection(map, stopFlag,checkerThread, BP);
+			if (!rememberIfReturnToLastIntersection)
+				fileProcessing.writeToFileNewIntersection(map, distanceTravelled);
+			else
+				fileProcessing.writeToFileReturningToLastIntersection(map);
+
 			// break;
 			okStartPID = true;
 			countStop = false;
@@ -250,6 +266,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 		}
 
 	}
+
 
 	move.stop();
 	checkerThread.stopMonitoring();
@@ -266,8 +283,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 
 
-int main(void)
-{
+int main(void) {
 	BrickPi3 BP;
 
 	BP.detect(); // Make sure that the BrickPi3 is communicating and that the firmware is compatible with the drivers.
@@ -301,17 +317,26 @@ int main(void)
 	BP.set_sensor_type(PORT_2, SENSOR_TYPE_NXT_ULTRASONIC); // forward
 
 
+	FileProcessing fileProcessing;
 
-	atomic<bool> stopFlag(false);
+	int result = fileProcessing.readFromFileIfManualOrAuto();
+	if ( result == 0 ) {
+		printf("Started manual control of the robot\n");
+	} else if ( result == 1 ) {
 
-	Sensor button(BP);
-	thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
+		printf("Started autonomous exploration\n");
+
+		atomic<bool> stopFlag(false);
+
+		Sensor button(BP);
+		thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
 
 
-	testRobot(stopFlag, BP);
+		autonomousMazeExploration(stopFlag, BP);
 
-	killMonitorThread.join();
+		killMonitorThread.join();
 
-	printf("Program exiting.\n");
+		printf("Program exiting.\n");
+	}
 	return 0;
 }

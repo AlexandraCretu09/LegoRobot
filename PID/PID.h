@@ -26,7 +26,7 @@ private:
     atomic<bool> &checkerForFrontBlock;
     static constexpr size_t BUFFER_SIZE = 5;
 
-
+    double computeDistanceTravelled(double elapsedTime);
     bool isTooCloseToLeft();
     bool isTooCloseToRight();
     void passTime(float seconds, std::atomic<bool>& stopFlag);

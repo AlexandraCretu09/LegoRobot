@@ -8,11 +8,11 @@
 #include "../common.h"
 
 struct intersectionNode {
+    std::string ID;
     intersectionNode *right;
     intersectionNode *left;
     intersectionNode *forward;
     intersectionNode *parent;
-    double initialGyroscopeReading;
     direction currentDirection;
     IntersectionWays possibleIntersectionWays;
 };
@@ -28,9 +28,12 @@ public:
     void printCurrentNode();
     void printCurrentNode(intersectionNode* node);
     turnDirection chooseNextDirection();
-    direction getCurrentDirection();
+
     bool returnToLastIntersectionLogic();
     bool checkIfNodeIsRoot();
+    std::string getID();
+    direction getCurrentDirection();
+    IntersectionWays getPossibleIntersectionWays();
 private:
     void printAllNodesRecursive(intersectionNode* node);
     intersectionNode *currentNode;

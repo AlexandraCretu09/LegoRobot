@@ -32,6 +32,8 @@ void PID::correctPath(){
 	int ct = 1;
 	int ctLeft = 1, ctRight = 1;
 
+	clock_t start = clock();
+
 	while(!stopFlag.load() && !checkerFlag.load() && !checkerForFrontBlock.load()) {
 		if(ct == 1) {
 			move.goForward();
@@ -57,7 +59,14 @@ void PID::correctPath(){
 		}
 	}
 
+
+	clock_t now = clock();
+	double elapsedTime = (double)(now - start) / CLOCKS_PER_SEC;
+
 	move.stop();
+
+	distanceTravelled = computeDistanceTravelled(elapsedTime);
+
 }
 
 bool PID::isTooCloseToLeft() {
@@ -139,6 +148,15 @@ void PID::antiCorrection(bool right, atomic<bool>& stopFlag) {
 		move.goForward();
 	}
 }
+
+double PID::computeDistanceTravelled(double elapsedTime) {
+	double distancePerRotation = 0.16;
+	double totalDegrees = 250 * elapsedTime;
+	double wheelRotation = totalDegrees/360;
+	return distancePerRotation * wheelRotation;
+
+}
+
 
 
 
