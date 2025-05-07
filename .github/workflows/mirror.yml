@@ -3,7 +3,7 @@ name: Mirror to GitLab
 on:
   push:
     branches:
-      - main  # or your main branch name
+      - master
 
 jobs:
   mirror:
