@@ -9,6 +9,7 @@ using namespace std;
 
 IntersectionDetails::IntersectionDetails() {
     intersectionNode *root = new intersectionNode();
+    root->ID = "Rt_";
     root->forward = nullptr;
     root->left = nullptr;
     root->right = nullptr;
@@ -16,7 +17,6 @@ IntersectionDetails::IntersectionDetails() {
     root->currentDirection = direction::forward;
     root->possibleIntersectionWays = {false, false, true};
     currentNode = root;
-
 }
 
 void IntersectionDetails::addNewIntersection(IntersectionWays possibleIntersectionWays) {
@@ -30,12 +30,15 @@ void IntersectionDetails::addNewIntersection(IntersectionWays possibleIntersecti
     switch (currentNode->currentDirection) {
         case direction::forward:
             currentNode->forward = newNode;
+            newNode->ID=currentNode->ID+"F";
             break;
         case direction::right:
             currentNode->right = newNode;
+            newNode->ID=currentNode->ID+"R";
             break;
         case direction::left:
             currentNode->left = newNode;
+            newNode->ID=currentNode->ID+"L";
             break;
     }
 
@@ -79,6 +82,7 @@ void IntersectionDetails::printCurrentNode() {
     printf("to the left: %d\n", copy->possibleIntersectionWays.left);
     printf("forward: %d\n", copy->possibleIntersectionWays.forward);
     printf("Direction taken: %d\n\n", copy->currentDirection);
+    printf("ID %s\n\n", copy->ID.c_str());
 }
 
 
@@ -88,6 +92,7 @@ void IntersectionDetails::printCurrentNode(intersectionNode *node) {
     printf("to the left: %d\n", node->possibleIntersectionWays.left);
     printf("forward: %d\n", node->possibleIntersectionWays.forward);
     printf("Direction taken: %d\n\n", node->currentDirection);
+    printf("ID %s\n\n", node->ID.c_str());
 }
 
 
@@ -95,8 +100,16 @@ void IntersectionDetails::printCurrentNode(intersectionNode *node) {
 
 direction IntersectionDetails::getCurrentDirection() {
     return currentNode->currentDirection;
-
 }
+
+string IntersectionDetails::getID() {
+    return currentNode->ID;
+}
+
+IntersectionWays IntersectionDetails::getPossibleIntersectionWays() {
+    return currentNode->possibleIntersectionWays;
+}
+
 
 turnDirection IntersectionDetails::chooseNextDirection() {
 

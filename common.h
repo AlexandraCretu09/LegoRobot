@@ -14,6 +14,7 @@
 extern std::mutex bpMutex;
 
 extern bool returnToLastIntersection;
+extern double distanceTravelled;
 
 
 struct MotorDetails{

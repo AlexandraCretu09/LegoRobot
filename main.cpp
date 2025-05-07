@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "CheckForIntersection/CheckForIntersection.h"
+#include "FileWriting/FileProcessing.h"
 #include "MappingLogic/IntersectionDetails.h"
 #include "MonitorGyroscope/MonitorIfStuck.h"
 
@@ -32,6 +33,7 @@ using namespace std;
 
 extern mutex bpMutex;
 extern bool returnToLastIntersection;
+extern double distanceTravelled;
 
 bool ok = false;
 float second = 1000000.0;
@@ -166,6 +168,8 @@ void proceedWithSpecialCases(IntersectionCheckerResult fullResult, CheckForInter
 	}
 }
 
+//ToDo: make it check if its in a special case until it isn't anymore
+
 void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 	Motor motor(BP);
@@ -186,6 +190,8 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	bool okStartPID = true;
 	bool countStop = false;
 	bool stopIntersectionCheckerThread = false;
+
+	FileProcessing fileProcessing;
 
 
 	CheckForIntersection checkerThread(stopFlag, checkerFlag,waiterForIntersectionResult, BP);
@@ -227,9 +233,11 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 				printf("\nAdding a new intersection..\n");
 				addNewIntersectionToMap(map, result);
 
+
 			}
 			else {
 				printf("Returning to last intersection..\n");
+				//fileProcesser.write(returning to last intersection);
 				bool finishedLabyrinth = returnToLastIntersectionLogic(map, stopFlag);
 				// map.printCurrentNode();
 				if (finishedLabyrinth == true) {
@@ -238,6 +246,8 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 			}
 			chooseNextDirection(map, stopFlag,checkerThread, BP);
+			fileProcessing.writeToFileNewIntersection(map, distanceTravelled);
+			break;
 			// break;
 			okStartPID = true;
 			countStop = false;

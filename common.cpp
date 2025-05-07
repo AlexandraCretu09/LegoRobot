@@ -10,6 +10,6 @@
 std::mutex bpMutex;
 
 bool returnToLastIntersection = false;
-
+double distanceTravelled = 0.0;
 
 
