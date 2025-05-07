@@ -170,7 +170,7 @@ void proceedWithSpecialCases(IntersectionCheckerResult fullResult, CheckForInter
 
 //ToDo: make it check if its in a special case until it isn't anymore
 
-void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
+void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 	Motor motor(BP);
 	WheelsMovement move(BP);
@@ -187,6 +187,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 	atomic<bool> checkerFlag(false);
 	atomic<bool> checkerForFrontBlock(false);
 	atomic<bool> waiterForIntersectionResult(false);
+
 	bool okStartPID = true;
 	bool countStop = false;
 	bool stopIntersectionCheckerThread = false;
@@ -229,6 +230,8 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 			IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
 			printIntersectionResult(fullResult);
 
+			bool rememberIfReturnToLastIntersection = returnToLastIntersection;
+
 			if (!returnToLastIntersection) {
 				printf("\nAdding a new intersection..\n");
 				addNewIntersectionToMap(map, result);
@@ -237,17 +240,20 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 			}
 			else {
 				printf("Returning to last intersection..\n");
-				//fileProcesser.write(returning to last intersection);
 				bool finishedLabyrinth = returnToLastIntersectionLogic(map, stopFlag);
 				// map.printCurrentNode();
 				if (finishedLabyrinth == true) {
+					fileProcessing.writeToFileFinishedLabyrinth();
 					break;
 				}
 
 			}
 			chooseNextDirection(map, stopFlag,checkerThread, BP);
-			fileProcessing.writeToFileNewIntersection(map, distanceTravelled);
-			break;
+			if (!rememberIfReturnToLastIntersection)
+				fileProcessing.writeToFileNewIntersection(map, distanceTravelled);
+			else
+				fileProcessing.writeToFileReturningToLastIntersection(map);
+
 			// break;
 			okStartPID = true;
 			countStop = false;
@@ -260,6 +266,7 @@ void testRobot(atomic<bool> &stopFlag,BrickPi3 &BP){
 		}
 
 	}
+
 
 	move.stop();
 	checkerThread.stopMonitoring();
@@ -311,6 +318,10 @@ int main(void)
 	BP.set_sensor_type(PORT_2, SENSOR_TYPE_NXT_ULTRASONIC); // forward
 
 
+	FileProcessing fileProcessing;
+	fileProcessing.readFromFileIfManualOrAuto();
+
+	return 0;
 
 	atomic<bool> stopFlag(false);
 
@@ -318,7 +329,7 @@ int main(void)
 	thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
 
 
-	testRobot(stopFlag, BP);
+	autonomousMazeExploration(stopFlag, BP);
 
 	killMonitorThread.join();
 

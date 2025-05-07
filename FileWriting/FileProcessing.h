@@ -16,14 +16,17 @@ class FileProcessing {
 public:
     FileProcessing();
     void writeToFileNewIntersection(IntersectionDetails result, double distanceTravelled);
-    void writeToFileReturningToLastIntersection();
-    void readFromFile();
+    void writeToFileReturningToLastIntersection(IntersectionDetails result);
+    void writeToFileFinishedLabyrinth();
+    int readFromFileIfManualOrAuto(); //0 - manual, 1 - auto, -1 - error
 
 private:
-    std::string filePathString = "/root/LegoRobotOutputFile/outputFile.txt";
-    char * filePath = "/root/LegoRobotOutputFile/outputFile.txt";
+    std::string writingPipePathString = "/root/LegoRobotOutputFile/backend_sending_node_data";
+    std::string readingPipePathString = "/root/LegoRobotOutputFile/frontend_sending_initial_command";
+    char * writingPipePath = "/root/LegoRobotOutputFile/frontend_sending_initial_command";
+    char * readingPipePath = "/root/LegoRobotOutputFile/frontend_sending_initial_command";
 
-    void initializeFifo();
+    void initializeFifo(std::string s);
 };
 
 
