@@ -76,6 +76,14 @@ void FileProcessing::writeToFileFinishedLabyrinth() {
     close(fd);
 }
 
+void FileProcessing::writeToFileMessage(const string &message) {
+    printf("Writing feedback message\n");
+    int fd = open(writingPipePathString.c_str(), O_WRONLY);
+    write(fd, message.c_str(), message.size());
+    close(fd);
+}
+
+
 char FileProcessing::readFromFileOneLetterCommand() {
 
     int fifo = open(readingPipePathString.c_str(), O_RDONLY);
@@ -97,8 +105,8 @@ char FileProcessing::readFromFileOneLetterCommand() {
         close(fifo);
         return command;
     }
-    perror("No data was read");
 
+    perror("No data was read");
     close(fifo);
     return '0';
 }
