@@ -8,7 +8,6 @@
 #include "brickpi/BrickPi3.h"
 #include <iostream>
 #include <unistd.h>
-#include <cstring>
 #include <cmath>
 #include <thread>
 #include <atomic>
@@ -27,13 +26,12 @@
 #include "Movement/wheelsMovement.h"
 #include "PID/PID.h"
 #include "SpecialCases/SpecialCases.h"
-#include "MappingLogic/IntersectionDetails.h"
 
 using namespace std;
 
-extern mutex bpMutex;
-extern bool returnToLastIntersection;
-extern double distanceTravelled;
+// extern mutex bpMutex;
+// extern bool returnToLastIntersection;
+// extern double distanceTravelled;
 
 bool ok = false;
 float second = 1000000.0;
@@ -199,7 +197,7 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 	MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
 
 	while (!stopFlag.load()) {
-		 break;
+		// break;
 		if (okStartPID) {
 			printf("Start moving\n");
 			waiterForIntersectionResult.store(false);
@@ -293,6 +291,8 @@ bool manualControl(BrickPi3 &BP) {
 	WheelsMovement movement(BP);
 	Rotation rotation(BP);
 
+	string message;
+
 	while (true) {
 		char command = fileProcessing.readFromFileOneLetterCommand();
 		if (command == 'w' || command == 'W') {
@@ -323,13 +323,18 @@ bool manualControl(BrickPi3 &BP) {
 		if (command == '0')
 			return false;
 
-		printf("Invalid letter, please choose between the following:\n"
+		message = "Invalid letter, please choose between the following:\n"
 			"Go forward: W\n"
 			"Go backwards: S\n"
 			"Rotate right: D\n"
 			"Rotate left: A\n"
 			"Rotate backwards: B\n"
-			"Exit: X\n");
+			"Exit: X\n";
+
+		printf("%s",message.c_str());
+
+		 fileProcessing.writeToFileMessage(message);
+
 	}
 
 }
@@ -383,22 +388,30 @@ int main() {
 	while (true) {
 		char result = fileProcessing.readFromFileOneLetterCommand();
 		if ( result == 'm' ) {
-			printf("Started manual control of the robot\n");
+			string message = "Started manual control of the robot\n";
+			printf(message.c_str());
+			fileProcessing.writeToFileMessage(message);
 			if (manualControl(BP) == true)
 				result = 'a';
 			else
 				break;
 		}
 		if ( result == 'a' ) {
-			printf("Started autonomous exploration\n");
+			string message = "Started autonomous exploration\n";
+			printf(message.c_str());
+			fileProcessing.writeToFileMessage(message);
 			startThreadsForAutonomousExploration(BP);
 			break;
 		}
-		if (result == 'e') {
-			printf("An error has occurred\n");
+		if (result == '0') {
+			string message = "An error has occurred\n";
+			printf(message.c_str());
+			fileProcessing.writeToFileMessage(message);
 			break;
 		}
-		printf("Invalid letter, please choose between Auto: 'a', or Manual: 'm'\n");
+		string message = "Invalid letter, please choose between Auto: 'a', or Manual: 'm'\n";
+		printf(message.c_str());
+		fileProcessing.writeToFileMessage(message);
 	}
 	return 0;
 }

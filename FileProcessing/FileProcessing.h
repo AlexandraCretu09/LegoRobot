@@ -18,6 +18,7 @@ public:
     void writeToFileNewIntersection(IntersectionDetails result, double distanceTravelled);
     void writeToFileReturningToLastIntersection(IntersectionDetails result);
     void writeToFileFinishedLabyrinth();
+    void writeToFileMessage(const std::string& message);
     char readFromFileOneLetterCommand(); //m - manual, a - auto, 0 - error THEN wasd, l - start autonomous maze exploration, x - exit
 
 private:
