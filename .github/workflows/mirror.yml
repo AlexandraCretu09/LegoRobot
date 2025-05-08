@@ -11,14 +11,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-#        with:
-#          fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Push to GitLab
         run: |
           git remote add gitlab https://$GITLAB_USERNAME:$GITLAB_TOKEN@gitlab.upt.ro/bianca.cretu/LegoRobot.git
           git push gitlab master
-#          git push gitlab master --force
+          git push gitlab master --force
     env:
       GITLAB_USERNAME: bianca.cretu
       GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
