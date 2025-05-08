@@ -18,8 +18,9 @@ using namespace std;
 class CheckForIntersection {
 public:
     mutex resultMutex;
-    IntersectionCheckerResult getLatestResult();
+
     CheckForIntersection(atomic<bool> &stopFlag, atomic<bool> &checkerFlag, atomic<bool> &waiterForIntersectionResult, BrickPi3 &BP);
+    IntersectionCheckerResult getLatestResult();
     void startMonitoring();
     void stopMonitoring();
     void checkUntilRobotPassedIntersection();

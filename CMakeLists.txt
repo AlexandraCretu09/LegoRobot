@@ -23,8 +23,8 @@ add_executable(brick_pi_clion main.cpp
         SpecialCases/SpecialCases.h
         MappingLogic/IntersectionDetails.cpp
         MappingLogic/IntersectionDetails.h
-        FileWriting/FileProcessing.cpp
-        FileWriting/FileProcessing.h
+        FileProcessing/FileProcessing.cpp
+        FileProcessing/FileProcessing.h
 
 )
 

@@ -18,13 +18,13 @@ public:
     void writeToFileNewIntersection(IntersectionDetails result, double distanceTravelled);
     void writeToFileReturningToLastIntersection(IntersectionDetails result);
     void writeToFileFinishedLabyrinth();
-    int readFromFileIfManualOrAuto(); //0 - manual, 1 - auto, -1 - error
+    char readFromFileOneLetterCommand(); //m - manual, a - auto, 0 - error THEN wasd, l - start autonomous maze exploration, x - exit
 
 private:
     std::string writingPipePathString = "/root/LegoRobotOutputFile/backend_sending_node_data";
-    std::string readingPipePathString = "/root/LegoRobotOutputFile/frontend_sending_initial_command";
-    char * writingPipePath = "/root/LegoRobotOutputFile/frontend_sending_initial_command";
-    char * readingPipePath = "/root/LegoRobotOutputFile/frontend_sending_initial_command";
+    std::string readingPipePathString = "/root/LegoRobotOutputFile/frontend_sending_command";
+    // char writingPipePath[] = "/root/LegoRobotOutputFile/frontend_sending_initial_command";
+    // char readingPipePath[] = "/root/LegoRobotOutputFile/frontend_sending_initial_command";
 
     void initializeFifo(std::string s);
 };

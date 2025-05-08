@@ -13,12 +13,20 @@
 
 class Rotation{
 public:
-	Rotation(BrickPi3 BP);
-	void rotateRight( std::atomic<bool> &stopFlag);
-	void rotateLeft( std::atomic<bool> &stopFlag);
-	void rotateBackwards(std::atomic<bool> &stopFlag);
+	explicit Rotation(BrickPi3 BP);
+	void rotateRightForAuto( std::atomic<bool> &stopFlag);
+	void rotateLeftForAuto(std::atomic<bool> &stopFlag);
+	void rotateBackwardsForAuto(std::atomic<bool> &stopFlag);
+
+	void rotateRightForManual();
+	void rotateLeftForManual();
+	void rotateBackwardsForManual();
+
 private:
 	BrickPi3 BP;
+	void rotateRight(std::atomic<bool> &stopFlag);
+	void rotateLeft(std::atomic<bool> &stopFlag);
+	void rotateBackwards(std::atomic<bool> &stopFlag);
 };
 
 

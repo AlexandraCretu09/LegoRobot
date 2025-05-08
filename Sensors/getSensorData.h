@@ -12,7 +12,7 @@
 
 class Sensor{
 	public:
-		Sensor(BrickPi3 &BP);
+		explicit Sensor(BrickPi3 &BP);
 		int getPortNumber(int x);
 		float returnUltrasonicValue(int x);
 		bool killButton();

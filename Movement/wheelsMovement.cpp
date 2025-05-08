@@ -45,6 +45,22 @@ void WheelsMovement::goForward(){
 	motor.setRightWheelDPS(250);
 }
 
+void WheelsMovement::goForward(int Position) {
+	Motor motor(BP);
+	MotorDetails motorDetails = {};
+
+	motor.resetBothMotorEncoders();
+	bool ok = true;
+	while(motorDetails.Position < Position) {
+		if(ok) {
+			goForward();
+			ok = false;
+		}
+		motorDetails = motor.getLeftMotorStatus();
+	}
+	stop();
+}
+
 void WheelsMovement::goBackwards(float noOfSeconds){
 
 	float time = noOfSeconds * second1;
@@ -63,16 +79,6 @@ void WheelsMovement::goBackwards(){
 	motor.setRightWheelDPS(-200);
 }
 
-void WheelsMovement::moveLeftWheel(float degrees){
-	Motor motor(BP);
-	motor.setLeftWheelDPS(degrees);
-}
-
-void WheelsMovement::moveRightWheel(float degrees){
-	Motor motor(BP);
-	motor.setRightWheelDPS(degrees);
-}
-
 void WheelsMovement::goBackwards(int Position) {
 	Motor motor(BP);
 	MotorDetails motorDetails = {};
@@ -86,7 +92,20 @@ void WheelsMovement::goBackwards(int Position) {
 		}
 		motorDetails = motor.getLeftMotorStatus();
 	}
+	stop();
 }
+
+void WheelsMovement::moveLeftWheel(float degrees){
+	Motor motor(BP);
+	motor.setLeftWheelDPS(degrees);
+}
+
+void WheelsMovement::moveRightWheel(float degrees){
+	Motor motor(BP);
+	motor.setRightWheelDPS(degrees);
+}
+
+
 
 
 void WheelsMovement::stop(){

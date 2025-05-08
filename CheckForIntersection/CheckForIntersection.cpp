@@ -69,7 +69,7 @@ void CheckForIntersection::checkUntilRobotPassedIntersection() {
             break;
         }
     }
-    move.goForward(0.25);
+    move.goForward(float(0.25));
 
     move.stop();
     printf("exited case where robot has to pass intersection\n");
@@ -128,7 +128,7 @@ void CheckForIntersection::checkUntilRobotReachIntersectionAgain() {
             break;
         }
     }
-    move.goForward(0.25);
+    move.goForward(float(0.25));
     move.stop();
     printf("exited case where robot has to reach intersection\n");
 
@@ -211,7 +211,7 @@ void CheckForIntersection::checker() {
 
 
 
-        move.goForward(0.25);
+        move.goForward(float(0.25));
 
 
         if (result.left || result.right || result.deadend) {

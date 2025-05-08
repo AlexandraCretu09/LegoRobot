@@ -17,7 +17,7 @@
 
 #include "common.h"
 #include "CheckForIntersection/CheckForIntersection.h"
-#include "FileWriting/FileProcessing.h"
+#include "FileProcessing/FileProcessing.h"
 #include "MappingLogic/IntersectionDetails.h"
 #include "MonitorGyroscope/MonitorIfStuck.h"
 
@@ -104,18 +104,18 @@ void chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, Check
 	switch (nextRotation) {
 		case turnRight:
 
-			rotation.rotateRight(stopFlag);
+			rotation.rotateRightForAuto(stopFlag);
 			checkerThread.checkUntilRobotPassedIntersection();
 			break;
 		case turnLeft:
-			rotation.rotateLeft(stopFlag);
+			rotation.rotateLeftForAuto(stopFlag);
 			checkerThread.checkUntilRobotPassedIntersection();
 			break;
 		case goStraight:
 			checkerThread.checkUntilRobotPassedIntersection();
 			break;
 		case turnBackwards:
-			rotation.rotateBackwards(stopFlag);
+			rotation.rotateBackwardsForAuto(stopFlag);
 			break;
 	}
 }
@@ -158,7 +158,7 @@ void proceedWithSpecialCases(IntersectionCheckerResult fullResult, CheckForInter
 		fullResult.specialCase1Right = deadendResult.tooCloseToTheRightWall;
 		// printf("results: Left: %d, right: %d\n", fullResult.specialCase1Left, fullResult.specialCase1Right);
 		executeSpecialCases(fullResult, BP);
-		move.goForward(1.5);
+		move.goForward(float(1.5));
 	}
 	else if (fullResult.specialCase1Left || fullResult.specialCase1Right || fullResult.specialCase2Left || fullResult.specialCase2Right)
 	{
@@ -199,7 +199,7 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 	MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
 
 	while (!stopFlag.load()) {
-		// break;
+		 break;
 		if (okStartPID) {
 			printf("Start moving\n");
 			waiterForIntersectionResult.store(false);
@@ -274,6 +274,66 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 	stopFlag.store(true);
 }
 
+void startThreadsForAutonomousExploration(BrickPi3 &BP) {
+	atomic<bool> stopFlag(false);
+
+	Sensor button(BP);
+	thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
+
+
+	autonomousMazeExploration(stopFlag, BP);
+
+	killMonitorThread.join();
+
+	printf("Program exiting.\n");
+}
+
+bool manualControl(BrickPi3 &BP) {
+	FileProcessing fileProcessing;
+	WheelsMovement movement(BP);
+	Rotation rotation(BP);
+
+	while (true) {
+		char command = fileProcessing.readFromFileOneLetterCommand();
+		if (command == 'w' || command == 'W') {
+			movement.goForward(250);
+			continue;
+		}
+		if (command == 's' || command == 'S') {
+			movement.goBackwards(-250);
+			continue;
+		}
+		if (command == 'a' || command == 'A') {
+			rotation.rotateLeftForManual();
+			continue;
+		}
+		if (command == 'd' || command == 'D') {
+			rotation.rotateRightForManual();
+			continue;
+		}
+		if (command == 'b' || command == 'B') {
+			rotation.rotateBackwardsForManual();
+			continue;
+		}
+
+		if (command == 'l' || command == 'L')
+			return true;
+		if (command == 'x' || command == 'X')
+			return false;
+		if (command == '0')
+			return false;
+
+		printf("Invalid letter, please choose between the following:\n"
+			"Go forward: W\n"
+			"Go backwards: S\n"
+			"Rotate right: D\n"
+			"Rotate left: A\n"
+			"Rotate backwards: B\n"
+			"Exit: X\n");
+	}
+
+}
+
 
 
 
@@ -283,7 +343,8 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 
 
-int main(void) {
+
+int main() {
 	BrickPi3 BP;
 
 	BP.detect(); // Make sure that the BrickPi3 is communicating and that the firmware is compatible with the drivers.
@@ -319,24 +380,25 @@ int main(void) {
 
 	FileProcessing fileProcessing;
 
-	int result = fileProcessing.readFromFileIfManualOrAuto();
-	if ( result == 0 ) {
-		printf("Started manual control of the robot\n");
-	} else if ( result == 1 ) {
-
-		printf("Started autonomous exploration\n");
-
-		atomic<bool> stopFlag(false);
-
-		Sensor button(BP);
-		thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
-
-
-		autonomousMazeExploration(stopFlag, BP);
-
-		killMonitorThread.join();
-
-		printf("Program exiting.\n");
+	while (true) {
+		char result = fileProcessing.readFromFileOneLetterCommand();
+		if ( result == 'm' ) {
+			printf("Started manual control of the robot\n");
+			if (manualControl(BP) == true)
+				result = 'a';
+			else
+				break;
+		}
+		if ( result == 'a' ) {
+			printf("Started autonomous exploration\n");
+			startThreadsForAutonomousExploration(BP);
+			break;
+		}
+		if (result == 'e') {
+			printf("An error has occurred\n");
+			break;
+		}
+		printf("Invalid letter, please choose between Auto: 'a', or Manual: 'm'\n");
 	}
 	return 0;
 }
