@@ -18,7 +18,7 @@ using namespace std;
 
 class Motor{
 	public:
-		Motor(BrickPi3 BP);
+		explicit Motor(BrickPi3 BP);
 		void setRightWheelDPS(int degrees);
 		void setLeftWheelDPS(int degrees);
 		MotorDetails getRightMotorStatus();

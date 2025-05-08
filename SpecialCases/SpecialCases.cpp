@@ -63,7 +63,7 @@ void SpecialCases::frontBlocked(Sensor &sensorObj) {
         Rotation rotation(BP);  // Create Rotation object
         std::atomic<bool> stopFlag(false);
 
-        rotation.rotateBackwards(stopFlag); // Rotate 180° backward
+        rotation.rotateBackwardsForAuto(stopFlag); // Rotate 180° backward
     }
 }
 void SpecialCases::cornerTrapRight(Sensor &sensorObj) {
@@ -89,7 +89,7 @@ void SpecialCases::cornerTrapRight(Sensor &sensorObj) {
     }
 
     if (frontSensor <= 6) {
-        rotation.rotateBackwards(stopFlag);  // Perform 180° backward rotation
+        rotation.rotateBackwardsForAuto(stopFlag);  // Perform 180° backward rotation
     } else {
         // **Step 3: Move forward until front sensor ≤ 6, then rotate**
         move.goForward();
@@ -97,7 +97,7 @@ void SpecialCases::cornerTrapRight(Sensor &sensorObj) {
             // Keep moving forward until front sensor reads ≤ 6
         }
         move.stop();
-        rotation.rotateBackwards(stopFlag); // Perform 180° backward rotation
+        rotation.rotateBackwardsForAuto(stopFlag); // Perform 180° backward rotation
     }
 }
 
@@ -124,7 +124,7 @@ void SpecialCases::cornerTrapLeft(Sensor &sensorObj) {
     }
 
     if (frontSensor <= 6) {
-        rotation.rotateBackwards(stopFlag);  // Perform 180° backward rotation
+        rotation.rotateBackwardsForAuto(stopFlag);  // Perform 180° backward rotation
     } else {
         // **Step 3: Move forward until front sensor ≤ 6, then rotate**
         move.goForward();
@@ -132,7 +132,7 @@ void SpecialCases::cornerTrapLeft(Sensor &sensorObj) {
             // Keep moving forward until front sensor reads ≤ 6
         }
         move.stop();
-        rotation.rotateBackwards(stopFlag); // Perform 180° backward rotation
+        rotation.rotateBackwardsForAuto(stopFlag); // Perform 180° backward rotation
     }
 }
 

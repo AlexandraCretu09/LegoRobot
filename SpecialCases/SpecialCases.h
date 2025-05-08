@@ -12,7 +12,7 @@ using namespace std;
 
 class SpecialCases {
 public:
-    SpecialCases(BrickPi3 &BP);
+    explicit SpecialCases(BrickPi3 &BP);
     void toCloseToTheRight();
     void toCloseToTheLeft();
     void frontBlocked(Sensor &sensorObj);

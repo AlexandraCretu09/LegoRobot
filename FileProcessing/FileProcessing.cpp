@@ -45,7 +45,7 @@ void FileProcessing::writeToFileNewIntersection(IntersectionDetails result, doub
 
 
 
-    fd = open(writingPipePath, O_WRONLY);
+    fd = open(writingPipePathString.c_str(), O_WRONLY);
     write(fd, output.c_str(), output.size());
     close(fd);
 }
@@ -61,7 +61,7 @@ void FileProcessing::writeToFileReturningToLastIntersection(IntersectionDetails 
                     "\"node_id\": \"" + ID + "\", "
                     "\"current_direction\": \"" + currentDirection + "\""
                     "}\n";
-    int fd = open(writingPipePath, O_WRONLY);
+    int fd = open(writingPipePathString.c_str(), O_WRONLY);
     write(fd, output.c_str(), output.size());
     close(fd);
 }
@@ -71,17 +71,17 @@ void FileProcessing::writeToFileFinishedLabyrinth() {
     string output = "{"
                     "\"finishedLabyrinth\": \"" + finishedLabyrinth + "\""
                     "}\n";
-    int fd = open(writingPipePath, O_WRONLY);
+    int fd = open(writingPipePathString.c_str(), O_WRONLY);
     write(fd, output.c_str(), output.size());
     close(fd);
 }
 
-int FileProcessing::readFromFileIfManualOrAuto() {
+char FileProcessing::readFromFileOneLetterCommand() {
 
-    int fifo = open(readingPipePath, O_RDONLY);
+    int fifo = open(readingPipePathString.c_str(), O_RDONLY);
     if (fifo == -1) {
         perror("Error opening FIFO for reading\n");
-        return -1;
+        return '0';
     }
     char command;
     ssize_t bytesRead = read(fifo, &command, sizeof(command));
@@ -89,24 +89,19 @@ int FileProcessing::readFromFileIfManualOrAuto() {
     if (bytesRead == -1) {
         perror("Error reading from FIFO\n");
         close(fifo);
-        return -1;
+        return '0';
     }
 
     if (bytesRead > 0) {
         printf("Received letter: %c\n", command);
-        if (command=='m')
-            return 0;
-        if (command=='a')
-            return 1;
-        perror("Invalid letter\n");
-        return -1;
+        close(fifo);
+        return command;
     }
     perror("No data was read");
 
     close(fifo);
-    return -1;
+    return '0';
 }
-
 
 
 
