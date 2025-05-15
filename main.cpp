@@ -181,7 +181,7 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 	bool countStop = false;
 	bool stopIntersectionCheckerThread = false;
 
-	FileProcessing fileProcessing;
+	// FileProcessing fileProcessing;
 
 
 	CheckForIntersection checkerThread(stopFlag, checkerFlag,waiterForIntersectionResult, BP);
@@ -232,16 +232,16 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 				bool finishedLabyrinth = returnToLastIntersectionLogic(map, stopFlag);
 				// map.printCurrentNode();
 				if (finishedLabyrinth == true) {
-					fileProcessing.writeToFileFinishedLabyrinth();
+					// fileProcessing.writeToFileFinishedLabyrinth();
 					break;
 				}
 
 			}
 			chooseNextDirection(map, stopFlag,checkerThread, BP);
-			if (!rememberIfReturnToLastIntersection)
-				fileProcessing.writeToFileNewIntersection(map, distanceTravelled);
-			else
-				fileProcessing.writeToFileReturningToLastIntersection(map);
+			// if (!rememberIfReturnToLastIntersection)
+			// 	fileProcessing.writeToFileNewIntersection(map, distanceTravelled);
+			// else
+			// 	fileProcessing.writeToFileReturningToLastIntersection(map);
 
 			// break;
 			okStartPID = true;
@@ -256,9 +256,14 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 
 	}
 
-
 	move.stop();
 	checkerThread.stopMonitoring();
+
+	map.printAllNodesID();
+	string b = "Rt_FR";
+	string a = "Rt_FRRLL";
+	printf("Path from A to B: %s\n\n", map.buildPathFromAToB(a, b).c_str());
+
 	// map.printAllNodes();
 	stopFlag.store(true);
 }
@@ -269,11 +274,9 @@ void startThreadsForAutonomousExploration(BrickPi3 &BP) {
 	Sensor button(BP);
 	thread killMonitorThread( monitorKillButton, ref(button), ref(stopFlag), ref(BP));
 
-
 	autonomousMazeExploration(stopFlag, BP);
 
 	killMonitorThread.join();
-
 	printf("Program exiting.\n");
 }
 
@@ -324,7 +327,7 @@ bool manualControl(BrickPi3 &BP) {
 
 		printf("%s",message.c_str());
 
-		 fileProcessing.writeToFileMessage(message);
+		 // fileProcessing.writeToFileMessage(message);
 
 	}
 
@@ -377,7 +380,8 @@ int main() {
 	FileProcessing fileProcessing;
 
 	while (true) {
-		char result = fileProcessing.readFromFileOneLetterCommand();
+		// char result = fileProcessing.readFromFileOneLetterCommand();
+		char result = 'a';
 		if ( result == 'm' ) {
 			string message = "Started manual control of the robot\n";
 			printf(message.c_str());
@@ -390,19 +394,19 @@ int main() {
 		if ( result == 'a' ) {
 			string message = "Started autonomous exploration\n";
 			printf(message.c_str());
-			fileProcessing.writeToFileMessage(message);
+			// fileProcessing.writeToFileMessage(message);
 			startThreadsForAutonomousExploration(BP);
 			break;
 		}
 		if (result == '0') {
 			string message = "An error has occurred\n";
 			printf(message.c_str());
-			fileProcessing.writeToFileMessage(message);
+			// fileProcessing.writeToFileMessage(message);
 			break;
 		}
 		string message = "Invalid letter, please choose between Auto: 'a', or Manual: 'm'\n";
 		printf(message.c_str());
-		fileProcessing.writeToFileMessage(message);
+		// fileProcessing.writeToFileMessage(message);
 	}
 	return 0;
 }

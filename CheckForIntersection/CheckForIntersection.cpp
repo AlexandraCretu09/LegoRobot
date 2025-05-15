@@ -265,7 +265,7 @@ void CheckForIntersection::updateRightBuffer(int rightValue) {
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionLeft(int rightValue) {
     if(rightValue > 20) {
-        if(leftSensorBuffer[1] <= 8 && leftSensorBuffer[2] <= 8) {
+        if(leftSensorBuffer[1] <= 7 && leftSensorBuffer[2] <= 7) {
             return true;
         }
     }
@@ -274,7 +274,7 @@ bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersec
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionRight(int leftValue) {
     if(leftValue > 20) {
-        if(rightSensorBuffer[1] <= 8 && rightSensorBuffer[2] <= 8) {
+        if(rightSensorBuffer[1] <= 7 && rightSensorBuffer[2] <= 7) {
             return true;
         }
     }
@@ -283,7 +283,7 @@ bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersec
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToWallWithTheIntersectionLeft(int leftValue, int rightValue) {
     if(leftValue > 20) {
-        if(leftSensorBuffer[1] <= 8 && leftSensorBuffer[2] <= 8){
+        if(leftSensorBuffer[1] <= 7 && leftSensorBuffer[2] <= 7){
             return true;
         }
     }
@@ -292,7 +292,7 @@ bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToWallWithTheIntersectio
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToWallWithTheIntersectionRight(int leftValue, int rightValue) {
     if(rightValue > 20) {
-        if(rightSensorBuffer[1] <= 8 && rightSensorBuffer[2] <= 8) {
+        if(rightSensorBuffer[1] <= 7 && rightSensorBuffer[2] <= 7) {
             return true;
         }
     }
