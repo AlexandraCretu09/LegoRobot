@@ -211,6 +211,97 @@ void IntersectionDetails::printAllNodesRecursive(intersectionNode *node) {
 
 
 
+string IntersectionDetails::buildPathFromAToB(string a, string b) {
+    string commonAncestor = getLowestCommonAncestor(a, b);
+    string pathFromAToB = buildPathFromAToCommonAncestor(a, commonAncestor);
+    char turnValueOfA, turnValueOfB;
+    getAtoBDifferentDirection(turnValueOfA, turnValueOfB, a, b);
+    pathFromAToB += chooseDirectionFromAToBInCriticalPoint(turnValueOfA, turnValueOfB);
+    pathFromAToB += buildPathFromCommonAncestorToB(pathFromAToB, commonAncestor);
+    return pathFromAToB;
+}
+
+string IntersectionDetails::getLowestCommonAncestor(const string &a, const string &b) {
+    string commonAncestor;
+    for (int i:a) {
+        if (a[i] == b[i])
+            commonAncestor += a[i];
+    }
+    return commonAncestor;
+}
+
+string IntersectionDetails::buildPathFromAToCommonAncestor(string a, const string& commonAncestor) {
+    string pathFromAToCommonAncestor;
+    while (true) {
+        string copy = a;
+        copy.pop_back();
+        if (compareStrings(copy, commonAncestor)) {
+            break;
+        }
+        char lastTurn = a[a.length()-1];
+        if (lastTurn == 'R')
+            pathFromAToCommonAncestor += 'L';
+        else if (lastTurn == 'L')
+            pathFromAToCommonAncestor += 'R';
+        else
+            pathFromAToCommonAncestor += lastTurn;
+        a.pop_back();
+    }
+    return pathFromAToCommonAncestor;
+}
+
+
+bool IntersectionDetails::compareStrings(const string& a, const string& b) {
+    return !strcmp(a.c_str(), b.c_str());
+}
+
+
+void IntersectionDetails::getAtoBDifferentDirection(char &x, char &y, const string &a, const string &b) {
+    for (int i:a) {
+        if (a[i] != b[i]) {
+            x = a[i];
+            y = b[i];
+            break;
+        }
+    }
+}
+
+char IntersectionDetails::chooseDirectionFromAToBInCriticalPoint(const char &x, const char &y) {
+    switch (x) {
+        case 'R':
+            if (y == 'L')
+                return 'F';
+            if (y == 'F')
+                return 'R';
+        case 'L':
+            if (y == 'R')
+                return 'F';
+            if (y == 'F')
+                return 'L';
+        case 'F':
+            if (y == 'L')
+                return 'R';
+            if (y == 'R')
+                return 'L';
+        default:
+            return '0';
+    }
+}
+
+string IntersectionDetails::buildPathFromCommonAncestorToB(string buildPath,  string b) {
+    b.erase(0, buildPath.length()+3);
+    for (int i:b) {
+        buildPath += b[i];
+    }
+    return buildPath;
+}
+
+
+
+
+
+
+
 
 
 

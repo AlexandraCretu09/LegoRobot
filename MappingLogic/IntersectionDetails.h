@@ -7,6 +7,7 @@
 
 #include "../common.h"
 
+using namespace std;
 struct intersectionNode {
     std::string ID;
     intersectionNode *right;
@@ -28,10 +29,11 @@ public:
     void printCurrentNode();
     void printCurrentNode(intersectionNode* node);
     turnDirection chooseNextDirection();
+    string buildPathFromAToB(string a, string b);
 
     bool returnToLastIntersectionLogic();
     bool checkIfNodeIsRoot();
-    std::string getID();
+    string getID();
     direction getCurrentDirection();
     IntersectionWays getPossibleIntersectionWays();
 private:
@@ -39,7 +41,13 @@ private:
     intersectionNode *currentNode;
     intersectionNode *getRoot(intersectionNode *node);
     IntersectionWays getIntersectionPossibleWays();
-    IntersectionWays getIntersectionVisitedWays();
+
+    static string getLowestCommonAncestor(const string &a, const string &b);
+    static string buildPathFromAToCommonAncestor(string a, const string& commonAncestor);
+    static bool compareStrings(const string& a, const string& b);
+    static void getAtoBDifferentDirection(char &x, char &y, const string &a, const string &b);
+    static char chooseDirectionFromAToBInCriticalPoint(const char &x, const char &y);
+    static string buildPathFromCommonAncestorToB(string buildPath, string b);
 };
 
 

@@ -45,15 +45,6 @@ void monitorKillButton(Sensor& button, atomic<bool>& stopFlag, BrickPi3 &BP){
 	}
 }
 
-// void monitorGyroscope(atomic<bool>& stopFlag, BrickPi3 &BP) {
-// 	Sensor sensor;
-// 	while(!stopFlag.load()) {
-//
-// 		sensor_gyro_t gyroValues = sensor.returnGyroValue(BP);
-// 		printf("Abs: %d\n", gyroValues.abs);
-// 	}
-// }
-
 void printIntersectionResult(IntersectionCheckerResult result) {
 	printf("Intersection result:\n");
 	printf("Intersection on the right: %d\n", result.right );
