@@ -203,11 +203,140 @@ intersectionNode *IntersectionDetails::getRoot(intersectionNode *initialNode) {
 void IntersectionDetails::printAllNodesRecursive(intersectionNode *node) {
     if (node!=nullptr) {
         printCurrentNode(node);
-        printAllNodesRecursive(currentNode->right);
-        printAllNodesRecursive(currentNode->forward);
-        printAllNodesRecursive(currentNode->left);
+        printAllNodesRecursive(node->right);
+        printAllNodesRecursive(node->forward);
+        printAllNodesRecursive(node->left);
     }
 }
+
+void IntersectionDetails::printAllNodesID() {
+    intersectionNode *copy = currentNode;
+    intersectionNode *root = getRoot(copy);
+    printAllNodesIDPrivate(root);
+}
+
+
+void IntersectionDetails::printAllNodesIDPrivate(intersectionNode *node) {
+    if (node!=nullptr) {
+        printf("Node ID: %s\n", node->ID.c_str());
+        printAllNodesRecursive(node->right);
+        printAllNodesRecursive(node->forward);
+        printAllNodesRecursive(node->left);
+    }
+}
+
+
+string IntersectionDetails::buildPathFromAToB(string a, string b) {
+    printf("\n\nIn build path from A to B\n");
+    string commonAncestor = getLowestCommonAncestor(a, b);
+    string pathFromAToB;
+    if (commonAncestor == a) {
+        pathFromAToB = buildPathFromCommonAncestorToB(pathFromAToB, commonAncestor, b);
+    } else if (commonAncestor == b) {
+        pathFromAToB = buildPathFromAToCommonAncestor(a, commonAncestor);
+    }else {
+        pathFromAToB = buildPathFromAToCommonAncestor(a, commonAncestor);
+        char turnValueOfA, turnValueOfB;
+        getAtoBDifferentDirection(turnValueOfA, turnValueOfB, a, b);
+        pathFromAToB += chooseDirectionFromAToBInCriticalPoint(turnValueOfA, turnValueOfB);
+        // printf("result of choose critical point direction: %s\n", pathFromAToB.c_str());
+        pathFromAToB = buildPathFromCommonAncestorToB(pathFromAToB, commonAncestor, b);
+    }
+    return pathFromAToB;
+}
+
+string IntersectionDetails::getLowestCommonAncestor(string a, string b) {
+    // printf("In get lowest common ancestor\n");
+    string commonAncestor;
+    for (int i=0; i< a.length(); i++) {
+        if (a[i] == b[i])
+            commonAncestor += a[i];
+    }
+    // printf("Ancestor: %s\n", commonAncestor.c_str());
+    return commonAncestor;
+}
+
+string IntersectionDetails::buildPathFromAToCommonAncestor(string a,  string commonAncestor) {
+
+    // printf("In build path from A to common ancestor\n");
+    string pathFromAToCommonAncestor;
+    while (true) {
+        string copy = a;
+        copy.pop_back();
+        if (compareStrings(copy, commonAncestor)) {
+            break;
+        }
+        char lastTurn = a[a.length()-1];
+        if (lastTurn == 'R')
+            pathFromAToCommonAncestor += 'L';
+        else if (lastTurn == 'L')
+            pathFromAToCommonAncestor += 'R';
+        else
+            pathFromAToCommonAncestor += lastTurn;
+        a.pop_back();
+    }
+    // printf("path: %s\n", pathFromAToCommonAncestor.c_str());
+    return pathFromAToCommonAncestor;
+}
+
+
+bool IntersectionDetails::compareStrings( string a,  string b) {
+    // printf("In comparing strings\n");
+    // printf("a: %s, b: %s\n\n", a.c_str(), b.c_str());
+    return !strcmp(a.c_str(), b.c_str());
+}
+
+
+void IntersectionDetails::getAtoBDifferentDirection(char &x, char &y, const string a, const string b) {
+    // printf("In get A to B Different Direction\n");
+    for (int i = 0;i<a.length();i++) {
+        if (a[i] != b[i]) {
+            x = a[i];
+            y = b[i];
+            break;
+        }
+    }
+}
+//toDO: if A is a part of B
+char IntersectionDetails::chooseDirectionFromAToBInCriticalPoint(char x, char y) {
+    // printf("in choose direction from A to B in critical point\n");
+    switch (x) {
+        case 'R':
+            if (y == 'L')
+                return 'F';
+            if (y == 'F')
+                return 'R';
+        case 'L':
+            if (y == 'R')
+                return 'F';
+            if (y == 'F')
+                return 'L';
+        case 'F':
+            if (y == 'L')
+                return 'R';
+            if (y == 'R')
+                return 'L';
+        default:
+            return '0';
+    }
+}
+
+string IntersectionDetails::buildPathFromCommonAncestorToB(string buildPath, string commonAncestor,  string b) {
+    printf("In build path from common ancestor to B\n");
+    printf("Built path: %s\n", buildPath.c_str());
+    printf("Full B: %s\n", b.c_str());
+    b.erase(0, commonAncestor.length()+1);
+    printf("Full B: %s\n", b.c_str());
+    for (int i=0; i<b.length(); i++) {
+        printf("B: %c\n", b[i]);
+        buildPath += b[i];
+    }
+    printf("path: %s\n", buildPath.c_str());
+    return buildPath;
+}
+
+
+
 
 
 

@@ -45,7 +45,7 @@ void MonitorIfStuck::monitorGyroAndFrontSensor() {
         int frontValue = getFrontSensorReading();
 
         // updateFrontBuffer(gyroValue);
-        printf("Front sensor values: %d\n", frontValue);
+        // printf("Front sensor values: %d\n", frontValue);
         updateGyroBuffer(frontValue);
         count++;
 
