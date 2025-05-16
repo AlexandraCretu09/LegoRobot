@@ -286,8 +286,8 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 				stopFlag.store(false);
 				usleep(second*3);
 			}
-		}
-		fileProcessing.stopMonitoringAndClosePipe();
+		}else
+			fileProcessing.stopMonitoringAndClosePipe();
 	}while (restart);
 
 
