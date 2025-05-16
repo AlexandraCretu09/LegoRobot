@@ -41,7 +41,7 @@ void Rotation::rotateLeftForManual(){
 void Rotation::rotateRightForAuto(atomic<bool> &stopFlag){
 
 	WheelsMovement move(BP);
-	move.goBackwards(-150);
+	move.goBackwards(-200);
 	rotateRight(stopFlag);
 }
 
@@ -90,7 +90,7 @@ void Rotation::rotateRight(std::atomic<bool> &stopFlag) {
 	motor.resetBothMotorEncoders();
 	while((motorDetails.Position < 450)){
 		if(ok){
-			move.moveRightWheel(20);
+			move.moveRightWheel(40);
 			move.moveLeftWheel(200);
 			ok = false;
 		}

@@ -219,9 +219,9 @@ void IntersectionDetails::printAllNodesID() {
 void IntersectionDetails::printAllNodesIDPrivate(intersectionNode *node) {
     if (node!=nullptr) {
         printf("Node ID: %s\n", node->ID.c_str());
-        printAllNodesRecursive(node->right);
-        printAllNodesRecursive(node->forward);
-        printAllNodesRecursive(node->left);
+        printAllNodesIDPrivate(node->right);
+        printAllNodesIDPrivate(node->forward);
+        printAllNodesIDPrivate(node->left);
     }
 }
 

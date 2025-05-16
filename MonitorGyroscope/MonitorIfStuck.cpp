@@ -21,7 +21,7 @@
 using namespace std;
 float second2 = 1000000.0;
 MonitorIfStuck::MonitorIfStuck(atomic<bool>& stopFlag, atomic<bool> &checkerForFrontBlock, BrickPi3& BP)
-    : isMonitoring(false), stopFlag(stopFlag), checkerForFrontBlock(checkerForFrontBlock), BP(BP) {
+    :  stopFlag(stopFlag), checkerForFrontBlock(checkerForFrontBlock), BP(BP), isMonitoring(false) {
 }
 
 int MonitorIfStuck::getGyroscopeReading() {
