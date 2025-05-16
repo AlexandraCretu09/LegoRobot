@@ -13,10 +13,17 @@
 
 using namespace std;
 
-FileProcessing::FileProcessing() {
+FileProcessing::FileProcessing() : flagForSwitchingBetweenAutoAndManual(nullptr), stopFlag(nullptr), isMonitoring(false) {
     initializeFifo(writingPipePathString);
     initializeFifo(readingPipePathString);
 }
+
+FileProcessing::FileProcessing(atomic<bool> &flagForSwitchingBetweenAutoAndManual, atomic<bool> &stopFlag)
+    : flagForSwitchingBetweenAutoAndManual(&flagForSwitchingBetweenAutoAndManual), stopFlag(&stopFlag),
+    isMonitoring(false) {
+    initializeFifo(readingPipeForStoppingDuringAuto);
+}
+
 
 
 void FileProcessing::writeToFileNewIntersection(IntersectionDetails result, double distanceTravelled) {
@@ -104,12 +111,75 @@ char FileProcessing::readFromFileOneLetterCommand() {
         printf("Received letter: %c\n", command);
         close(fifo);
         return command;
+
     }
 
     perror("No data was read");
     close(fifo);
     return '0';
 }
+
+void FileProcessing::readFromFileIfSwitchFromAutoToManual() {
+    int fifo = open(readingPipeForStoppingDuringAuto.c_str(), O_RDONLY);
+    if (fifo == -1) {
+        perror("Error opening FIFO for reading\n");
+    }
+    char command;
+    ssize_t bytesRead = read(fifo, &command, sizeof(command));
+
+    if (bytesRead == -1) {
+        perror("Error reading from FIFO\n");
+        close(fifo);
+    }
+
+    if (bytesRead > 0) {
+        printf("Received letter: %c\n", command);
+        if (command == 'x') {
+            printf("Shutdown command received.\n");
+            return;
+        }
+        close(fifo);
+        flagForSwitchingBetweenAutoAndManual->store(true);
+        stopFlag->store(true);
+    }
+    perror("No data was read");
+    close(fifo);
+}
+
+void FileProcessing::writeToSwitchingBetweenAutoAndManual() {
+    int fd = open(readingPipeForStoppingDuringAuto.c_str(), O_WRONLY);
+    string a = "x";
+    write(fd, a.c_str(), a.size());
+    close(fd);
+}
+
+
+void FileProcessing::startMonitoring() {
+    isMonitoring = true;
+    printf("Started monitoring the file\n");
+    monitorThread = thread(&FileProcessing::readFromFileIfSwitchFromAutoToManual, this);
+}
+
+void FileProcessing::stopMonitoring() {
+    if (isMonitoring) {
+        isMonitoring = false;
+        if (monitorThread.joinable()) {
+            monitorThread.join();
+        }
+    }
+}
+
+void FileProcessing::stopMonitoringAndClosePipe() {
+    writeToSwitchingBetweenAutoAndManual();
+    if (isMonitoring) {
+        isMonitoring = false;
+        if (monitorThread.joinable()) {
+            monitorThread.join();
+        }
+    }
+}
+
+
 
 
 
