@@ -35,6 +35,9 @@ using namespace std;
 
 bool ok = false;
 float second = 1000000.0;
+
+bool manualControl(BrickPi3 &BP);
+
 void monitorKillButton(Sensor& button, atomic<bool>& stopFlag, BrickPi3 &BP){
 	while(!stopFlag.load()){
 		if(button.killButton()){
@@ -121,35 +124,43 @@ bool returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopF
 }
 
 
-void executeSpecialCases(IntersectionCheckerResult fullResult, BrickPi3 &BP) {
+bool executeSpecialCases(IntersectionCheckerResult fullResult, BrickPi3 &BP) {
 	SpecialCases specialCasesProceeder(BP);
 	if (fullResult.specialCase1Left) {
-		printf("Robot is too close to left wall on opposite side of intersection, which is on right\n");
+		// printf("Robot is too close to left wall on opposite side of intersection, which is on right\n");
 		specialCasesProceeder.toCloseToTheLeft();
+		return true;
 	}if (fullResult.specialCase1Right) {
-		printf("Robot is too close to right wall on opposite side of intersection, which is on left\n");
+		// printf("Robot is too close to right wall on opposite side of intersection, which is on left\n");
 		specialCasesProceeder.toCloseToTheRight();
+		return true;
 	}if (fullResult.specialCase2Left) {
-		printf("Robot is too close to left wall on side of intersection, which is on left\n");
+		// printf("Robot is too close to left wall on side of intersection, which is on left\n");
 		specialCasesProceeder.toCloseToTheLeft();
+		return true;
 	}if (fullResult.specialCase2Right) {
-		printf("Robot is too close to right wall on side of intersection, which is on right\n");
+		// printf("Robot is too close to right wall on side of intersection, which is on right\n");
 		specialCasesProceeder.toCloseToTheRight();
+		return true;
 	}
+	return false;
 }
 
 void proceedWithSpecialCases(IntersectionCheckerResult fullResult, CheckForIntersection &checkerThread,BrickPi3 &BP) {
 	if (fullResult.deadend) {
 		WheelsMovement move(BP);
 		printf("Realised its in a deadend\n");
-		deadendSpecialCases deadendResult = checkerThread.checkIfDeadendPositionIsInASpecialCase();
-		fullResult.specialCase1Left = deadendResult.tooCloseToTheLeftWall;
-		fullResult.specialCase1Right = deadendResult.tooCloseToTheRightWall;
-		// printf("results: Left: %d, right: %d\n", fullResult.specialCase1Left, fullResult.specialCase1Right);
-		executeSpecialCases(fullResult, BP);
-		move.goForward(float(1.5));
-	}
-	else if (fullResult.specialCase1Left || fullResult.specialCase1Right || fullResult.specialCase2Left || fullResult.specialCase2Right)
+		while (true){
+			deadendSpecialCases deadendResult = checkerThread.checkIfDeadendPositionIsInASpecialCase();
+			fullResult.specialCase1Left = deadendResult.tooCloseToTheLeftWall;
+			fullResult.specialCase1Right = deadendResult.tooCloseToTheRightWall;
+			// printf("results: Left: %d, right: %d\n", fullResult.specialCase1Left, fullResult.specialCase1Right);
+			if (!executeSpecialCases(fullResult, BP)) {
+				move.goForward(float(1.5));
+				break;
+			}
+		}
+	} else if (fullResult.specialCase1Left || fullResult.specialCase1Right || fullResult.specialCase2Left || fullResult.specialCase2Right)
 	{
 		printf("Realised its in a special case\n");
 		executeSpecialCases(fullResult, BP);
@@ -157,112 +168,128 @@ void proceedWithSpecialCases(IntersectionCheckerResult fullResult, CheckForInter
 	}
 }
 
-//ToDo: make it check if its in a special case until it isn't anymore
 
 void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 
-	Motor motor(BP);
-	WheelsMovement move(BP);
-	Sensor sensor(BP);
+	bool restart;
 
-	printf("Test gyro: %f\n", sensor.returnGyroValue());
+	do {
+		restart = false;
+		Motor motor(BP);
+		WheelsMovement move(BP);
+		Sensor sensor(BP);
 
-	printf("Reset encoders\n");
-	motor.resetBothMotorEncoders();
+		printf("Test gyro: %f\n", sensor.returnGyroValue());
 
-	usleep(second);
-	IntersectionDetails map{};
+		printf("Reset encoders\n");
+		motor.resetBothMotorEncoders();
 
-	atomic<bool> checkerFlag(false);
-	atomic<bool> checkerForFrontBlock(false);
-	atomic<bool> waiterForIntersectionResult(false);
+		usleep(second);
+		IntersectionDetails map{};
 
-	bool okStartPID = true;
-	bool countStop = false;
-	bool stopIntersectionCheckerThread = false;
+		atomic<bool> checkerFlag(false);
+		atomic<bool> checkerForFrontBlock(false);
+		atomic<bool> waiterForIntersectionResult(false);
+		atomic<bool> readFromFileIfSwitchFromAutoToManual(false);
 
-	// FileProcessing fileProcessing;
+		bool okStartPID = true;
+		bool countStop = false;
+		bool stopIntersectionCheckerThread = false;
 
+		FileProcessing fileProcessing(readFromFileIfSwitchFromAutoToManual, stopFlag);
+		fileProcessing.startMonitoring();
 
-	CheckForIntersection checkerThread(stopFlag, checkerFlag,waiterForIntersectionResult, BP);
-	MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
+		CheckForIntersection checkerThread(stopFlag, checkerFlag,waiterForIntersectionResult, BP);
+		MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
 
-	while (!stopFlag.load()) {
-		// break;
-		if (okStartPID) {
-			printf("Start moving\n");
-			waiterForIntersectionResult.store(false);
-			startMovement(stopFlag, checkerFlag, checkerThread, checkerForFrontBlock, monitorIfStuckThread, BP);
-			okStartPID = false;
-		}
-		monitorIfStuckThread.stopMonitoring();
-		if (checkerForFrontBlock.load()) {
-
-			// printf("Entered front end blockage\n");
-			move.goBackwards(-250);
-			checkerForFrontBlock.store(false);
-			stopFlag.store(false);
-			stopIntersectionCheckerThread = true;
-
-		}
-		if (checkerFlag.load()) {
-			// printf("Exited front end blockage\n");
-			while (waiterForIntersectionResult.load() == false) {
-				// printf("In while, waiting for intersection result\n");
-				if (!countStop) {
-					move.stop();
-					countStop = true;
-				}
-			}
-			IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
-			proceedWithSpecialCases(fullResult, checkerThread, BP);
-			IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
-			printIntersectionResult(fullResult);
-
-			bool rememberIfReturnToLastIntersection = returnToLastIntersection;
-
-			if (!returnToLastIntersection) {
-				printf("\nAdding a new intersection..\n");
-				addNewIntersectionToMap(map, result);
-
-
-			}
-			else {
-				printf("Returning to last intersection..\n");
-				bool finishedLabyrinth = returnToLastIntersectionLogic(map, stopFlag);
-				// map.printCurrentNode();
-				if (finishedLabyrinth == true) {
-					// fileProcessing.writeToFileFinishedLabyrinth();
-					break;
-				}
-
-			}
-			chooseNextDirection(map, stopFlag,checkerThread, BP);
-			// if (!rememberIfReturnToLastIntersection)
-			// 	fileProcessing.writeToFileNewIntersection(map, distanceTravelled);
-			// else
-			// 	fileProcessing.writeToFileReturningToLastIntersection(map);
-
+		while (!stopFlag.load() && !readFromFileIfSwitchFromAutoToManual.load()) {
 			// break;
-			okStartPID = true;
-			countStop = false;
-			checkerFlag.store(false);
-			stopIntersectionCheckerThread = false;
+			if (okStartPID) {
+				printf("Start moving\n");
+				waiterForIntersectionResult.store(false);
+				startMovement(stopFlag, checkerFlag, checkerThread, checkerForFrontBlock, monitorIfStuckThread, BP);
+				okStartPID = false;
+			}
+			monitorIfStuckThread.stopMonitoring();
+			if (checkerForFrontBlock.load()) {
+
+				// printf("Entered front end blockage\n");
+				move.goBackwards(-250);
+				checkerForFrontBlock.store(false);
+				stopFlag.store(false);
+				stopIntersectionCheckerThread = true;
+
+			}
+			if (checkerFlag.load()) {
+				// printf("Exited front end blockage\n");
+				while (waiterForIntersectionResult.load() == false) {
+					if (!countStop) {
+						move.stop();
+						countStop = true;
+					}
+				}
+				IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
+				proceedWithSpecialCases(fullResult, checkerThread, BP);
+				IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
+				printIntersectionResult(fullResult);
+
+				bool rememberIfReturnToLastIntersection = returnToLastIntersection;
+
+				if (!returnToLastIntersection) {
+					printf("\nAdding a new intersection..\n");
+					addNewIntersectionToMap(map, result);
+
+
+				}
+				else {
+					printf("Returning to last intersection..\n");
+					bool finishedLabyrinth = returnToLastIntersectionLogic(map, stopFlag);
+					// map.printCurrentNode();
+					if (finishedLabyrinth == true) {
+						// fileProcessing.writeToFileFinishedLabyrinth();
+						break;
+					}
+
+				}
+				chooseNextDirection(map, stopFlag,checkerThread, BP);
+				// if (!rememberIfReturnToLastIntersection)
+				// 	fileProcessing.writeToFileNewIntersection(map, distanceTravelled);
+				// else
+				// 	fileProcessing.writeToFileReturningToLastIntersection(map);
+
+				// break;
+				okStartPID = true;
+				countStop = false;
+				checkerFlag.store(false);
+				stopIntersectionCheckerThread = false;
+			}
+			if (stopIntersectionCheckerThread) {
+				checkerThread.stopMonitoring();
+				okStartPID = true;
+			}
 		}
-		if (stopIntersectionCheckerThread) {
-			checkerThread.stopMonitoring();
-			okStartPID = true;
-		}
 
-	}
+		move.stop();
+		checkerThread.stopMonitoring();
+		monitorIfStuckThread.stopMonitoring();
 
-	move.stop();
-	checkerThread.stopMonitoring();
+		map.printAllNodesID();
+		// string b = "Rt_FR";
+		// string a = "Rt_FRRLL";
+		// printf("Path from A to B: %s\n\n", map.buildPathFromAToB(a, b).c_str());
 
-	map.printAllNodesID();
-	string b = "Rt_FR";
-	string a = "Rt_FRRLL";
-	printf("Path from A to B: %s\n\n", map.buildPathFromAToB(a, b).c_str());
+		if (readFromFileIfSwitchFromAutoToManual.load() == true) {
+			printf("Robot has stopped from auto and is switching to manual now.\n");
+			fileProcessing.stopMonitoring();
+			if (manualControl(BP)) {
+				restart = true;
+				stopFlag.store(false);
+				usleep(second*3);
+			}
+		}else
+			fileProcessing.stopMonitoringAndClosePipe();
+	}while (restart);
+
 
 	// map.printAllNodes();
 	stopFlag.store(true);
@@ -380,8 +407,8 @@ int main() {
 	FileProcessing fileProcessing;
 
 	while (true) {
-		// char result = fileProcessing.readFromFileOneLetterCommand();
-		char result = 'a';
+		char result = fileProcessing.readFromFileOneLetterCommand();
+		// char result = 'a';
 		if ( result == 'm' ) {
 			string message = "Started manual control of the robot\n";
 			printf(message.c_str());
