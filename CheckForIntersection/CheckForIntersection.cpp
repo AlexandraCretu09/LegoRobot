@@ -21,14 +21,14 @@ CheckForIntersection::CheckForIntersection(atomic<bool> &stopFlag, atomic<bool> 
 
 }
 
-void CheckForIntersection::checkUntilRobotPassedIntersection() {
+void CheckForIntersection::checkUntilRobotPassedIntersection(int *leftValues, int *rightValues) {
     Sensor sensor(BP);
     WheelsMovement move(BP);
     Motor motor(BP);
 
     motor.resetBothMotorEncoders();
 
-    float leftValue, rightValue;
+    int leftValue, rightValue;
 
     printf("in case where robot has to pass intersection\n");
 
@@ -46,18 +46,15 @@ void CheckForIntersection::checkUntilRobotPassedIntersection() {
         rightValue = sensor.returnUltrasonicValue(3);
         // printf("left: %.2f, right: %.2f\n", leftValue, rightValue);
 
-        if (rightValue <= 20)
+        if (rightValue <= 20) {
+            rightValues[countRight] = rightValue;
             countRight++;
-        if (leftValue <= 20)
-            countLeft++;
 
-        // retryCount++;
-        // if (retryCount > 5000) {
-        //     printf("Timeout: sensor values didn't drop for passing interseciton\n");
-        //     move.stop();
-        //     move.goBackwards(-150);
-        //     break;
-        // }
+        }
+        if (leftValue <= 20) {
+            leftValues[countLeft] = leftValue;
+            countLeft++;
+        }
 
         clock_t now = clock();
         double elapsed = (double)(now - start) / CLOCKS_PER_SEC;
@@ -83,6 +80,8 @@ void CheckForIntersection::checkUntilRobotReachIntersectionAgain() {
     Sensor sensor(BP);
     WheelsMovement move(BP);
     Motor motor(BP);
+
+    move.goForward(float(0.50));
 
     motor.resetBothMotorEncoders();
 
@@ -110,13 +109,6 @@ void CheckForIntersection::checkUntilRobotReachIntersectionAgain() {
         if (leftValue > 20)
             countLeft++;
 
-        // retryCount++;
-        // if (retryCount > 4500) {
-        //     printf("Timeout: sensor values didn't drop for reaching intersection\n");
-        //     move.stop();
-        //     move.goBackwards(-150);
-        //     break;
-        // }
 
         clock_t now = clock();
         double elapsed = (double)(now - start) / CLOCKS_PER_SEC;
@@ -134,9 +126,9 @@ void CheckForIntersection::checkUntilRobotReachIntersectionAgain() {
 
 }
 
-deadendSpecialCases CheckForIntersection::checkIfDeadendPositionIsInASpecialCase() {
+deadendAndIntersectionSpecialCases CheckForIntersection::checkIfDeadendPositionIsInASpecialCase() {
     Sensor sensor(BP);
-    deadendSpecialCases result = {false, false};
+    deadendAndIntersectionSpecialCases result = {false, false};
     int countLeft = 0, countRight = 0, overallCounter=0;
     while (overallCounter < 3 && !stopFlag.load()) {
         if (sensor.returnUltrasonicValue(4) <= 7) {
@@ -156,6 +148,25 @@ deadendSpecialCases CheckForIntersection::checkIfDeadendPositionIsInASpecialCase
     return result;
 
 }
+
+deadendAndIntersectionSpecialCases CheckForIntersection::checkIfIntersectionPositionIsInASpecialCase(int leftValues[], int rightValues[]) {
+    deadendAndIntersectionSpecialCases result = {false, false};
+    int countLeft = 0, countRight = 0;
+    for (int i=0;i<3;i++){
+        if (leftValues[i] <= 7)
+            countLeft++;
+        if (rightValues[i] <= 7)
+            rightValues++;
+    }
+    if (countLeft) {
+        result.tooCloseToTheLeftWall = true;
+    }
+    if (countRight) {
+        result.tooCloseToTheRightWall = true;
+    }
+    return result;
+}
+
 
 
 
@@ -265,7 +276,7 @@ void CheckForIntersection::updateRightBuffer(int rightValue) {
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionLeft(int rightValue) {
     if(rightValue > 20) {
-        if(leftSensorBuffer[1] <= 7 && leftSensorBuffer[2] <= 7) {
+        if(leftSensorBuffer[1] <= 7 || leftSensorBuffer[0] <= 7) {
             return true;
         }
     }
@@ -274,7 +285,7 @@ bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersec
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersectionRight(int leftValue) {
     if(leftValue > 20) {
-        if(rightSensorBuffer[1] <= 7 && rightSensorBuffer[2] <= 7) {
+        if(rightSensorBuffer[1] <= 7 || rightSensorBuffer[0] <= 7) {
             return true;
         }
     }
@@ -283,7 +294,7 @@ bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToOppositeWallOfIntersec
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToWallWithTheIntersectionLeft(int leftValue, int rightValue) {
     if(leftValue > 20) {
-        if(leftSensorBuffer[1] <= 7 && leftSensorBuffer[2] <= 7){
+        if(leftSensorBuffer[1] <= 7 || leftSensorBuffer[0] <= 7){
             return true;
         }
     }
@@ -292,7 +303,7 @@ bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToWallWithTheIntersectio
 
 bool CheckForIntersection::checkCaseWhereRobotIsTooCloseToWallWithTheIntersectionRight(int leftValue, int rightValue) {
     if(rightValue > 20) {
-        if(rightSensorBuffer[1] <= 7 && rightSensorBuffer[2] <= 7) {
+        if(rightSensorBuffer[1] <= 7 || rightSensorBuffer[0] <= 7) {
             return true;
         }
     }

@@ -150,7 +150,7 @@ void PID::antiCorrection(bool right, atomic<bool>& stopFlag) {
 }
 
 double PID::computeDistanceTravelled(double elapsedTime) {
-	double distancePerRotation = 0.16;
+	double distancePerRotation = 16.0;
 	double totalDegrees = 250 * elapsedTime;
 	double wheelRotation = totalDegrees/360;
 	return distancePerRotation * wheelRotation;
