@@ -8,6 +8,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <sys/stat.h>
+// #inlcude <uwebsockets/App.h>
 
 #include "../MappingLogic/IntersectionDetails.h"
 
@@ -133,14 +134,15 @@ void FileProcessing::readFromFileIfSwitchFromAutoToManual() {
     }
 
     if (bytesRead > 0) {
-        printf("Received letter: %c\n", command);
+        // printf("Received letter: %c\n", command);
+        stopFlag->store(true);
+        close(fifo);
         if (command == 'x') {
-            printf("Shutdown command received.\n");
+            // printf("Shutdown command received.\n");
             return;
         }
-        close(fifo);
         flagForSwitchingBetweenAutoAndManual->store(true);
-        stopFlag->store(true);
+        // stopFlag->store(true);
     }
     perror("No data was read");
     close(fifo);
@@ -156,7 +158,7 @@ void FileProcessing::writeToSwitchingBetweenAutoAndManual() {
 
 void FileProcessing::startMonitoring() {
     isMonitoring = true;
-    printf("Started monitoring the file\n");
+    // printf("Started monitoring the file\n");
     monitorThread = thread(&FileProcessing::readFromFileIfSwitchFromAutoToManual, this);
 }
 
@@ -178,10 +180,6 @@ void FileProcessing::stopMonitoringAndClosePipe() {
         }
     }
 }
-
-
-
-
 
 void FileProcessing::initializeFifo(string path) {
     if (access(path.c_str(), F_OK) == -1) {

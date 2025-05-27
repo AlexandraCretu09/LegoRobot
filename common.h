@@ -42,7 +42,7 @@ struct IntersectionWays {
 	bool forward;
 };
 
-struct deadendSpecialCases {
+struct deadendAndIntersectionSpecialCases {
 	bool tooCloseToTheLeftWall;
 	bool tooCloseToTheRightWall;
 };

@@ -17,7 +17,7 @@ class Sensor{
 		float returnUltrasonicValue(int x);
 		bool killButton();
 
-		double returnGyroValue();
+		int16_t returnGyroValue();
 private:
 	BrickPi3 &BP;
 };

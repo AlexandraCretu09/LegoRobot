@@ -69,14 +69,14 @@ bool Sensor::killButton(){
 	return false;
 }
 
-double Sensor::returnGyroValue(){
-	sensor_gyro_t Gyro;
-
+int16_t Sensor::returnGyroValue(){
+	sensor_gyro_t Gyro{};
 	lock_guard<mutex> lock(bpMutex);
 	if(!BP.get_sensor(PORT_1, &Gyro)){
-		double abs = double(Gyro.abs);
-		return abs;
+		return Gyro.abs;
 	}
+	printf("Returning null\n");
+	return NULL;
 }
 
 

@@ -26,8 +26,8 @@ MonitorIfStuck::MonitorIfStuck(atomic<bool>& stopFlag, atomic<bool> &checkerForF
 
 int MonitorIfStuck::getGyroscopeReading() {
     Sensor sensor(BP);
-    int gyroValues = sensor.returnGyroValue();
-    return gyroValues;
+    // int gyroValues = sensor.returnGyroValue();
+    // return gyroValues;
 }
 
 int MonitorIfStuck::getFrontSensorReading() {
