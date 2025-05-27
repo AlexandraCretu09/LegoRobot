@@ -47,12 +47,14 @@ void CheckForIntersection::checkUntilRobotPassedIntersection(int *leftValues, in
         // printf("left: %.2f, right: %.2f\n", leftValue, rightValue);
 
         if (rightValue <= 20) {
-            rightValues[countRight] = rightValue;
+            if (countRight < 3)
+                rightValues[countRight] = rightValue;
             countRight++;
 
         }
         if (leftValue <= 20) {
-            leftValues[countLeft] = leftValue;
+            if (countLeft < 3)
+                leftValues[countLeft] = leftValue;
             countLeft++;
         }
 
@@ -66,7 +68,7 @@ void CheckForIntersection::checkUntilRobotPassedIntersection(int *leftValues, in
             break;
         }
     }
-    move.goForward(float(0.25));
+    // move.goForward(float(0.25));
 
     move.stop();
     printf("exited case where robot has to pass intersection\n");

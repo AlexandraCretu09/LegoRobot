@@ -11,7 +11,6 @@
 #include <cmath>
 #include <thread>
 #include <atomic>
-#include <mutex>
 
 
 #include "common.h"
@@ -109,12 +108,13 @@ bool chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, Brick
 			rotation.rotateBackwardsForAuto(stopFlag);
 			return false;
 	}
+	return false;
 }
 
 void chooseNextDirectionAndExecuteSpecialCases(IntersectionDetails &map, atomic<bool> &stopFlag, CheckForIntersection &checkerThread, BrickPi3 &BP) {
 	bool chooseNextDirectionResults = chooseNextDirection(map, stopFlag, BP);
 	if (chooseNextDirectionResults) {
-		int leftValues[3] = {-99}, rightValues[3] = {-99};
+		int leftValues[] = {99, 99, 99}, rightValues[] = {99, 99, 99};
 		while (true) {
 			checkerThread.checkUntilRobotPassedIntersection(leftValues, rightValues);
 			deadendAndIntersectionSpecialCases intersectionResult = checkerThread.checkIfIntersectionPositionIsInASpecialCase(leftValues, rightValues);
@@ -199,7 +199,6 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 		restart = false;
 		Motor motor(BP);
 		WheelsMovement move(BP);
-		Sensor sensor(BP);
 
 		// printf("Test gyro: %f\n", sensor.returnGyroValue());
 
@@ -383,8 +382,6 @@ bool manualControl(BrickPi3 &BP) {
 
 }
 
-//ToDo make it check special cases while its reaching intersection
-
 
 // 55 - diametrul pe dreapta
 
@@ -426,6 +423,11 @@ int main() {
 	BP.set_sensor_type(PORT_1, SENSOR_TYPE_EV3_GYRO_ABS); //
 	BP.set_sensor_type(PORT_2, SENSOR_TYPE_NXT_ULTRASONIC); // forward
 
+	// Rotation rotate(BP);
+	// atomic<bool> stopFlag;
+	// stopFlag.store(false);
+	// rotate.rotateBackwardsForAuto(stopFlag);
+	// return 0;
 
 	FileProcessing fileProcessing;
 

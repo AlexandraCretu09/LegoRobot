@@ -23,7 +23,7 @@ public:
     IntersectionCheckerResult getLatestResult();
     void startMonitoring();
     void stopMonitoring();
-    void checkUntilRobotPassedIntersection(int *leftValues, int *rightValues);
+    void checkUntilRobotPassedIntersection(int leftValues[], int rightValues[]);
     void checkUntilRobotReachIntersectionAgain();
     deadendAndIntersectionSpecialCases checkIfDeadendPositionIsInASpecialCase();
     deadendAndIntersectionSpecialCases checkIfIntersectionPositionIsInASpecialCase(int leftValues[], int rightValues[]);
