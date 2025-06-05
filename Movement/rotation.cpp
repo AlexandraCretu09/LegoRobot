@@ -128,7 +128,7 @@ void Rotation::rotateBackwards(std::atomic<bool> &stopFlag) {
 	bool ok = true;
 	motor.resetBothMotorEncoders();
 	motorDetailsA = motor.getRightMotorStatus();
-	while (motorDetailsA.Position < 450 && !stopFlag.load() && gyroValue - 85 < gyroValue2) {
+	while (motorDetailsA.Position < 450 && !stopFlag.load() && ((gyroValue - 85) < gyroValue2)) {
 		if (ok){
 			move.moveRightWheel(200);
 			ok = false;
@@ -145,7 +145,7 @@ void Rotation::rotateBackwards(std::atomic<bool> &stopFlag) {
 	motor.resetBothMotorEncoders();
 	motorDetailsB = motor.getLeftMotorStatus();
 
-	while (motorDetailsB.Position > -390 && !stopFlag.load() && gyroValue - 80 < gyroValue2) {
+	while (motorDetailsB.Position > -390 && !stopFlag.load() && ((gyroValue - 80) < gyroValue2)) {
 		if (ok) {
 			move.moveLeftWheel(-200);
 			ok = false;

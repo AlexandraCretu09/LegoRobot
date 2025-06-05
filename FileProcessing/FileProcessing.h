@@ -24,6 +24,7 @@ public:
     void writeToFileMessage(const std::string& message);
     char readFromFileOneLetterCommand(); //m - manual, a - auto, 0 - error THEN wasd, l - start autonomous maze exploration, x - exit
     void readFromFileIfSwitchFromAutoToManual(); //any character, but only one
+    void readFromFileStringAAndB(std::string &a, std::string &b);
     void startMonitoring();
     void stopMonitoring();
     void stopMonitoringAndClosePipe();
@@ -37,6 +38,8 @@ private:
     std::string writingPipePathString = "/root/LegoRobotOutputFile/backend_sending_node_data";
     std::string readingPipePathString = "/root/LegoRobotOutputFile/frontend_sending_command";
     std::string readingPipeForStoppingDuringAuto = "/root/LegoRobotOutputFile/frontend_sending_switching_from_auto_to_manual_command";
+    std::string readingPipePathAandB = "/root/LegoRobotOutputFile/frontend_sending_a_and_b";
+
 
     void initializeFifo(std::string s);
     void writeToSwitchingBetweenAutoAndManual();

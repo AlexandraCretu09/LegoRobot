@@ -17,7 +17,7 @@
 #include "CheckForIntersection/CheckForIntersection.h"
 #include "FileProcessing/FileProcessing.h"
 #include "MappingLogic/IntersectionDetails.h"
-#include "MonitorGyroscope/MonitorIfStuck.h"
+#include "MonitorIfStuck/MonitorIfStuck.h"
 
 #include "Sensors/getSensorData.h"
 #include "Motor/motor.h"
@@ -60,7 +60,7 @@ void printIntersectionResult(IntersectionCheckerResult result) {
 }
 
 void startMovement(atomic<bool> &stopFlag, atomic<bool> &checkerFlag, CheckForIntersection &checkerThread, atomic<bool> &checkerForFrontBlock,
-	MonitorIfStuck &monitorIfStuckThread, BrickPi3 BP) {
+	MonitorIfStuck &monitorIfStuckThread, BrickPi3 &BP) {
 
 	checkerThread.startMonitoring();
 	monitorIfStuckThread.startMonitoring();
@@ -88,9 +88,13 @@ void addNewIntersectionToMap(IntersectionDetails &map, IntersectionWays result) 
 	// map.printAllParentNodes();
 }
 
-bool chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, BrickPi3 &BP) {
-	turnDirection nextRotation = map.chooseNextDirection();
+bool chooseNextDirection(IntersectionDetails &map, turnDirection directionChosen, atomic<bool> &stopFlag, BrickPi3 &BP) {
+	turnDirection nextRotation;
 	Rotation rotation(BP);
+	if (directionChosen != turnDirection::noDirection)
+		nextRotation = directionChosen;
+	else
+		nextRotation = map.chooseNextDirection();
 
 	switch (nextRotation) {
 		case turnRight:
@@ -111,8 +115,9 @@ bool chooseNextDirection(IntersectionDetails &map, atomic<bool> &stopFlag, Brick
 	return false;
 }
 
-void chooseNextDirectionAndExecuteSpecialCases(IntersectionDetails &map, atomic<bool> &stopFlag, CheckForIntersection &checkerThread, BrickPi3 &BP) {
-	bool chooseNextDirectionResults = chooseNextDirection(map, stopFlag, BP);
+void chooseNextDirectionAndExecuteSpecialCases(IntersectionDetails &map, turnDirection directionChosen, atomic<bool> &stopFlag, CheckForIntersection &checkerThread, BrickPi3 &BP) {
+
+	bool chooseNextDirectionResults = chooseNextDirection(map, directionChosen, stopFlag, BP);
 	if (chooseNextDirectionResults) {
 		int leftValues[] = {99, 99, 99}, rightValues[] = {99, 99, 99};
 		while (true) {
@@ -190,8 +195,117 @@ void proceedWithSpecialCases(IntersectionCheckerResult fullResult, CheckForInter
 	}
 }
 
+void traversePathFromAToB(const string& path, atomic<bool> &stopFlag, BrickPi3 &BP) {
+	bool okStartPID = true;
+	bool stopIntersectionCheckerThread = false;
+	bool countStop = false;
 
-void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
+	printf("received path: %s", path.c_str());
+	printf(", path size: %d\n", path.length());
+
+	stopFlag.store(false);
+	atomic<bool> checkerFlag(false);
+	atomic<bool> checkerForFrontBlock(false);
+	atomic<bool> waiterForIntersectionResult(false);
+
+	WheelsMovement move(BP);
+
+	CheckForIntersection checkerThread(stopFlag, checkerFlag,waiterForIntersectionResult, BP);
+	MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
+
+	for (int i=0;i<path.length();i++) {
+		printf("inside the for loop, i = %c\n", path[i]);
+		if (okStartPID) {
+			printf("starting the movement\n");
+			startMovement(stopFlag, checkerFlag, checkerThread, checkerForFrontBlock, monitorIfStuckThread, BP);
+			okStartPID = false;
+		}
+		printf("before stopping the isStuck thread\n");
+		monitorIfStuckThread.stopMonitoring();
+		printf("after stopping it\n");
+		if (checkerForFrontBlock.load()) {
+			printf("inside if with the checkerForFrontBlock\n");
+			move.goBackwards(-250);
+			checkerForFrontBlock.store(false);
+			stopFlag.store(false);
+			stopIntersectionCheckerThread = true;
+		}
+		printf("exited blockage\n");
+		if (checkerFlag.load()) {
+			printf("Inside if checkerFlag\n");
+			while (waiterForIntersectionResult.load() == false) {
+				if (!countStop) {
+					printf("inside the while where it has to wait for intersection result\n");
+					move.stop();
+					countStop = true;
+				}
+			}
+			printf("before getting the full result\n");
+			IntersectionCheckerResult fullResult = rememberIntersection(stopFlag, checkerThread, BP);
+			proceedWithSpecialCases(fullResult, checkerThread, BP);
+			IntersectionWays result = convertIntersectionWithSpecialCasesToOnlyWays(fullResult);
+			printIntersectionResult(fullResult);
+
+
+			turnDirection direction;
+			switch (path[i]){
+				case 'F':
+					direction = goStraight;
+					break;
+				case 'R':
+					direction = turnRight;
+					break;
+				case 'L':
+					direction = turnLeft;
+					break;
+				default:
+					break;
+			}
+			printf("after deciding the direction: %d\n", direction);
+			IntersectionDetails map{};
+			chooseNextDirectionAndExecuteSpecialCases(map, direction, stopFlag,checkerThread, BP);
+			printf("after chooseDirection and execution of special cases\n");
+
+			// break;
+			okStartPID = true;
+			countStop = false;
+			checkerFlag.store(false);
+
+			stopIntersectionCheckerThread = false;
+		}
+		if (stopIntersectionCheckerThread) {
+			checkerThread.stopMonitoring();
+			okStartPID = true;
+		}
+	}
+}
+
+void proceedWithPathFromAToB(IntersectionDetails map, atomic<bool> &stopFlag, BrickPi3 &BP) {
+	FileProcessing fileProcessing;
+	printf("Please input if robot should go from A to B\n");
+	char result = fileProcessing.readFromFileOneLetterCommand();
+	if (result == 'y') {
+		string a, b;
+		printf("Waiting for the user to send the IDs of A and B...\n");
+		fileProcessing.readFromFileStringAAndB(a, b);
+		string path = map.buildPathFromAToB(a, b);
+		printf("Path from A to B: %s\n\n", path.c_str());
+		printf("Please send input once the robot is positioned correctly.\n");
+		char command = fileProcessing.readFromFileOneLetterCommand();
+		if (command == 'x') {
+			printf("Exiting...\n");
+			return;
+		}
+		if (!path.empty())
+			traversePathFromAToB(path, stopFlag, BP);
+		else
+			perror("Path couldn't be computed\n");
+	}else
+		printf("Exiting...\n");
+}
+
+
+void autonomousMazeExploration(atomic<bool> &stopFlag, BrickPi3 &BP){
 
 	bool restart;
 
@@ -273,7 +387,7 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 					}
 
 				}
-				chooseNextDirectionAndExecuteSpecialCases(map, stopFlag,checkerThread, BP);
+				chooseNextDirectionAndExecuteSpecialCases(map, turnDirection::noDirection ,stopFlag,checkerThread, BP);
 				if (!rememberIfReturnToLastIntersection)
 					fileProcessing.writeToFileNewIntersection(map, distanceTravelled);
 				else
@@ -296,9 +410,12 @@ void autonomousMazeExploration(atomic<bool> &stopFlag,BrickPi3 &BP){
 		monitorIfStuckThread.stopMonitoring();
 
 		map.printAllNodesID();
+
 		// string b = "Rt_FR";
 		// string a = "Rt_FRRLL";
 		// printf("Path from A to B: %s\n\n", map.buildPathFromAToB(a, b).c_str());
+
+		proceedWithPathFromAToB(map, stopFlag, BP);
 
 		if (readFromFileIfSwitchFromAutoToManual.load() == true) {
 			printf("Robot has stopped from auto and is switching to manual now.\n");
@@ -430,8 +547,11 @@ int main() {
 	// return 0;
 
 	FileProcessing fileProcessing;
+	WheelsMovement move(BP);
+	move.stop();
 
 	while (true) {
+		printf("Waiting for user to decide between auto - a, manual - m, or exiting - e\n");
 		char result = fileProcessing.readFromFileOneLetterCommand();
 		// char result = 'a';
 		if ( result == 'm' ) {

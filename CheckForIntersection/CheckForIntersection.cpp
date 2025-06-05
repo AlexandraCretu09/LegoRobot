@@ -174,8 +174,10 @@ deadendAndIntersectionSpecialCases CheckForIntersection::checkIfIntersectionPosi
 
 void CheckForIntersection::checker() {
 
+    rightSensorBuffer[0] = 99;
     rightSensorBuffer[1] = 99;
     rightSensorBuffer[2] = 99;
+    leftSensorBuffer[0] = 99;
     leftSensorBuffer[1] = 99;
     leftSensorBuffer[2] = 99;
 

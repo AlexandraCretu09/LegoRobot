@@ -59,7 +59,8 @@ enum turnDirection {
 	turnRight,
 	turnLeft,
 	turnBackwards,
-	goStraight
+	goStraight,
+	noDirection
 };
 
 
