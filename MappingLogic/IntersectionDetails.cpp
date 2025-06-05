@@ -116,7 +116,7 @@ turnDirection IntersectionDetails::chooseNextDirection() {
     IntersectionWays possibleWays = getIntersectionPossibleWays();
 
     switch (currentNode->currentDirection) {
-        case nothing:
+        case noDirection:
             returnToLastIntersection = false;
             if (possibleWays.right) {
                 currentNode->currentDirection = direction::right;

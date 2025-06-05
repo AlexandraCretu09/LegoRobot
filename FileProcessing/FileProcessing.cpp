@@ -10,6 +10,8 @@
 #include <sys/stat.h>
 // #inlcude <uwebsockets/App.h>
 
+#include <cstring>
+
 #include "../MappingLogic/IntersectionDetails.h"
 
 using namespace std;
@@ -17,6 +19,7 @@ using namespace std;
 FileProcessing::FileProcessing() : flagForSwitchingBetweenAutoAndManual(nullptr), stopFlag(nullptr), isMonitoring(false) {
     initializeFifo(writingPipePathString);
     initializeFifo(readingPipePathString);
+    initializeFifo(readingPipePathAandB);
 }
 
 FileProcessing::FileProcessing(atomic<bool> &flagForSwitchingBetweenAutoAndManual, atomic<bool> &stopFlag)
@@ -96,14 +99,15 @@ char FileProcessing::readFromFileOneLetterCommand() {
 
     int fifo = open(readingPipePathString.c_str(), O_RDONLY);
     if (fifo == -1) {
-        perror("Error opening FIFO for reading\n");
+        perror("Error opening FIFO for reading");
+        close(fifo);
         return '0';
     }
     char command;
     ssize_t bytesRead = read(fifo, &command, sizeof(command));
 
     if (bytesRead == -1) {
-        perror("Error reading from FIFO\n");
+        perror("Error reading from FIFO");
         close(fifo);
         return '0';
     }
@@ -123,14 +127,17 @@ char FileProcessing::readFromFileOneLetterCommand() {
 void FileProcessing::readFromFileIfSwitchFromAutoToManual() {
     int fifo = open(readingPipeForStoppingDuringAuto.c_str(), O_RDONLY);
     if (fifo == -1) {
-        perror("Error opening FIFO for reading\n");
+        perror("Error opening FIFO for reading");
+        close(fifo);
+        return;
     }
     char command;
     ssize_t bytesRead = read(fifo, &command, sizeof(command));
 
     if (bytesRead == -1) {
-        perror("Error reading from FIFO\n");
+        perror("Error reading from FIFO");
         close(fifo);
+        return;
     }
 
     if (bytesRead > 0) {
@@ -139,6 +146,7 @@ void FileProcessing::readFromFileIfSwitchFromAutoToManual() {
         close(fifo);
         if (command == 'x') {
             // printf("Shutdown command received.\n");
+            close(fifo);
             return;
         }
         flagForSwitchingBetweenAutoAndManual->store(true);
@@ -154,6 +162,37 @@ void FileProcessing::writeToSwitchingBetweenAutoAndManual() {
     write(fd, a.c_str(), a.size());
     close(fd);
 }
+
+void FileProcessing::readFromFileStringAAndB(string &a, string &b) {
+    int fd = open(readingPipePathAandB.c_str(), O_RDONLY);
+    if (fd == -1) {
+        perror("Error opening FD for reading\n");
+        return;
+    }
+    char IDs[100];
+    ssize_t bytesRead = read(fd, &IDs, sizeof(IDs)-1);
+
+    if (bytesRead == -1) {
+        perror("Error reading from fd");
+        close(fd);
+        return;
+    }
+
+    if (bytesRead > 0) {
+        IDs[bytesRead] = '\0';
+        printf("IDs received: %s\n", IDs); //looking like IDs = "Rt_FRL Rt_FFRR"
+        char *t = strtok(IDs, " ");
+        a = t;
+        t = strtok(NULL, " ");
+        b = t;
+        printf("Read strings:\na: %s\nb: %s\n", a.c_str(), b.c_str());
+        close(fd);
+        return;
+    }
+    perror("No data was read");
+    close(fd);
+}
+
 
 
 void FileProcessing::startMonitoring() {

@@ -17,8 +17,8 @@ add_executable(brick_pi_clion main.cpp
         Sensors/getSensorData.cpp
         common.cpp
         Resource.cpp
-        MonitorGyroscope/MonitorIfStuck.h
-        MonitorGyroscope/MonitorIfStuck.cpp
+        MonitorIfStuck/MonitorIfStuck.h
+        MonitorIfStuck/MonitorIfStuck.cpp
         CheckForIntersection/CheckForIntersection.cpp
         CheckForIntersection/CheckForIntersection.h
         SpecialCases/SpecialCases.cpp
