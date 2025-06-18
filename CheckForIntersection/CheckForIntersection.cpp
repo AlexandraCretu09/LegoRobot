@@ -257,7 +257,7 @@ void CheckForIntersection::checker() {
         // printf("Forward value: %f\n", forwardValue);
 
         constexpr float second = 1000000.0;
-        usleep(second/8);
+        usleep(second/6);
     }
 }
 

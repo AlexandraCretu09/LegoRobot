@@ -12,13 +12,11 @@
 #include <thread>
 #include <atomic>
 
-
 #include "common.h"
 #include "CheckForIntersection/CheckForIntersection.h"
 #include "FileProcessing/FileProcessing.h"
 #include "MappingLogic/IntersectionDetails.h"
 #include "MonitorIfStuck/MonitorIfStuck.h"
-
 #include "Sensors/getSensorData.h"
 #include "Motor/motor.h"
 #include "Movement/rotation.h"
@@ -27,10 +25,6 @@
 #include "SpecialCases/SpecialCases.h"
 
 using namespace std;
-
-// extern mutex bpMutex;
-// extern bool returnToLastIntersection;
-// extern double distanceTravelled;
 
 bool ok = false;
 float second = 1000000.0;
@@ -42,9 +36,9 @@ void monitorKillButton(Sensor& button, atomic<bool>& stopFlag, BrickPi3 &BP){
 	while(!stopFlag.load()){
 		if(button.killButton()){
 			printf("Button pressed.\n");
-			stopFlag = true;
+			stopFlag.store(true);
 		}
-		usleep(250000);
+		usleep(second);
 	}
 }
 
@@ -53,10 +47,6 @@ void printIntersectionResult(IntersectionCheckerResult result) {
 	printf("Intersection on the right: %d\n", result.right );
 	printf("Intersection on the left: %d\n", result.left );
 	printf("Intersection on the forward: %d\n", result.forward );
-	// printf("Special case 1 left: %d\n", result.specialCase1Left);
-	// printf("Special case 1 right: %d\n", result.specialCase1Right);
-	// printf("Special case 2 left: %d\n", result.specialCase2Left);
-	// printf("Special case 2 right: %d\n", result.specialCase2Right);
 }
 
 void startMovement(atomic<bool> &stopFlag, atomic<bool> &checkerFlag, CheckForIntersection &checkerThread, atomic<bool> &checkerForFrontBlock,
@@ -65,6 +55,7 @@ void startMovement(atomic<bool> &stopFlag, atomic<bool> &checkerFlag, CheckForIn
 	checkerThread.startMonitoring();
 	monitorIfStuckThread.startMonitoring();
 	PID pid(stopFlag, checkerFlag, checkerForFrontBlock, BP);
+	printf("declared PID\n");
 	pid.correctPath();
 }
 
@@ -99,14 +90,11 @@ bool chooseNextDirection(IntersectionDetails &map, turnDirection directionChosen
 	switch (nextRotation) {
 		case turnRight:
 			rotation.rotateRightForAuto(stopFlag);
-			// checkerThread.checkUntilRobotPassedIntersection();
 			return true;
 		case turnLeft:
 			rotation.rotateLeftForAuto(stopFlag);
-			// checkerThread.checkUntilRobotPassedIntersection();
 			return true;
 		case goStraight:
-			// checkerThread.checkUntilRobotPassedIntersection();
 			return true;
 		case turnBackwards:
 			rotation.rotateBackwardsForAuto(stopFlag);
@@ -143,11 +131,14 @@ bool returnToLastIntersectionLogic(IntersectionDetails &map, atomic<bool> &stopF
 
 bool checkForAndExecuteSpecialCases(deadendAndIntersectionSpecialCases fullResult, BrickPi3 &BP) {
 	SpecialCases specialCasesProceeder(BP);
+	WheelsMovement move(BP);
 	if (fullResult.tooCloseToTheLeftWall) {
 		specialCasesProceeder.toCloseToTheLeft();
+		move.goForward(static_cast<float>(0.5));
 		return true;
 	}if (fullResult.tooCloseToTheRightWall) {
 		specialCasesProceeder.toCloseToTheRight();
+		move.goForward((float)0.5);
 		return true;
 	}
 	return false;
@@ -179,8 +170,11 @@ void proceedWithSpecialCases(IntersectionCheckerResult fullResult, CheckForInter
 			deadendAndIntersectionSpecialCases deadendResult = checkerThread.checkIfDeadendPositionIsInASpecialCase();
 			fullResult.specialCase1Left = deadendResult.tooCloseToTheLeftWall;
 			fullResult.specialCase1Right = deadendResult.tooCloseToTheRightWall;
-			// printf("results: Left: %d, right: %d\n", fullResult.specialCase1Left, fullResult.specialCase1Right);
-
+			printf("Realised its in a special case\n");
+			if (fullResult.specialCase1Left)
+				printf("Robot is too close to left side\n");
+			if (fullResult.specialCase1Right)
+				printf("Robot is too close to right side\n");
 			if (!checkForAndExecuteSpecialCases(fullResult, BP)) {
 				move.goForward(float(1.5));
 				break;
@@ -189,7 +183,13 @@ void proceedWithSpecialCases(IntersectionCheckerResult fullResult, CheckForInter
 		}
 	} else if (fullResult.specialCase1Left || fullResult.specialCase1Right || fullResult.specialCase2Left || fullResult.specialCase2Right)
 	{
+
 		printf("Realised its in a special case\n");
+		if (fullResult.specialCase1Left || fullResult.specialCase2Left)
+			printf("Robot is too close to left side\n");
+		if (fullResult.specialCase1Right || fullResult.specialCase2Right)
+			printf("Robot is too close to right side\n");
+
 		checkForAndExecuteSpecialCases(fullResult, BP);
 		checkerThread.checkUntilRobotReachIntersectionAgain();
 	}
@@ -214,28 +214,22 @@ void traversePathFromAToB(const string& path, atomic<bool> &stopFlag, BrickPi3 &
 	MonitorIfStuck monitorIfStuckThread(stopFlag, checkerForFrontBlock, BP);
 
 	for (int i=0;i<path.length();i++) {
-		printf("inside the for loop, i = %c\n", path[i]);
 		if (okStartPID) {
-			printf("starting the movement\n");
 			startMovement(stopFlag, checkerFlag, checkerThread, checkerForFrontBlock, monitorIfStuckThread, BP);
 			okStartPID = false;
 		}
-		printf("before stopping the isStuck thread\n");
 		monitorIfStuckThread.stopMonitoring();
-		printf("after stopping it\n");
 		if (checkerForFrontBlock.load()) {
-			printf("inside if with the checkerForFrontBlock\n");
 			move.goBackwards(-250);
 			checkerForFrontBlock.store(false);
 			stopFlag.store(false);
 			stopIntersectionCheckerThread = true;
 		}
-		printf("exited blockage\n");
 		if (checkerFlag.load()) {
-			printf("Inside if checkerFlag\n");
+			if (i == path.length()-1)
+				break;
 			while (waiterForIntersectionResult.load() == false) {
 				if (!countStop) {
-					printf("inside the while where it has to wait for intersection result\n");
 					move.stop();
 					countStop = true;
 				}
@@ -278,11 +272,14 @@ void traversePathFromAToB(const string& path, atomic<bool> &stopFlag, BrickPi3 &
 			okStartPID = true;
 		}
 	}
+	move.stop();
+	checkerThread.stopMonitoring();
+	monitorIfStuckThread.stopMonitoring();
 }
 
 void proceedWithPathFromAToB(IntersectionDetails map, atomic<bool> &stopFlag, BrickPi3 &BP) {
 	FileProcessing fileProcessing;
-	printf("Please input if robot should go from A to B\n");
+	printf("\nPlease input if robot should go from A to B\n");
 	char result = fileProcessing.readFromFileOneLetterCommand();
 	if (result == 'y') {
 		string a, b;
@@ -313,11 +310,13 @@ void autonomousMazeExploration(atomic<bool> &stopFlag, BrickPi3 &BP){
 		restart = false;
 		Motor motor(BP);
 		WheelsMovement move(BP);
+		Sensor sensor(BP);
 
-		// printf("Test gyro: %f\n", sensor.returnGyroValue());
+		printf("Test gyro: %f\n", sensor.returnGyroValue());
 
 		printf("Reset encoders\n");
 		motor.resetBothMotorEncoders();
+		printf("Finished resetting encoders\n");
 
 		usleep(second);
 		IntersectionDetails map{};
@@ -374,7 +373,6 @@ void autonomousMazeExploration(atomic<bool> &stopFlag, BrickPi3 &BP){
 				if (!returnToLastIntersection) {
 					printf("\nAdding a new intersection..\n");
 					addNewIntersectionToMap(map, result);
-
 
 				}
 				else {
@@ -540,11 +538,6 @@ int main() {
 	BP.set_sensor_type(PORT_1, SENSOR_TYPE_EV3_GYRO_ABS); //
 	BP.set_sensor_type(PORT_2, SENSOR_TYPE_NXT_ULTRASONIC); // forward
 
-	// Rotation rotate(BP);
-	// atomic<bool> stopFlag;
-	// stopFlag.store(false);
-	// rotate.rotateBackwardsForAuto(stopFlag);
-	// return 0;
 
 	FileProcessing fileProcessing;
 	WheelsMovement move(BP);

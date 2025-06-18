@@ -47,20 +47,12 @@ float Sensor::returnUltrasonicValue(int x){
 	if(BP.get_sensor(PORT, &Ultra)){
 		;
 	}else{
-
 		return Ultra.cm;
 	}
 	return NULL;
 }
 
 bool Sensor::killButton(){
-	// sensor_touch_t Button;
-
-
-	// if(!BP.get_sensor(PORT_2, &Button)){
-	// 	return Button.pressed;
-	// }
-	lock_guard<mutex> lock(bpMutex);
 	if (returnUltrasonicValue(3) <= 5 && returnUltrasonicValue(3) > 0 &&
 	    returnUltrasonicValue(4) > 0 && returnUltrasonicValue(4) <= 5) {
 		printf("sensor values: %f, %f ",returnUltrasonicValue(3), returnUltrasonicValue(4));
@@ -72,8 +64,10 @@ bool Sensor::killButton(){
 int16_t Sensor::returnGyroValue(){
 	sensor_gyro_t Gyro{};
 	lock_guard<mutex> lock(bpMutex);
-	if(!BP.get_sensor(PORT_1, &Gyro)){
-		return Gyro.abs;
+	{
+		if(!BP.get_sensor(PORT_1, &Gyro)){
+			return Gyro.abs;
+		}
 	}
 	printf("Returning null\n");
 	return NULL;
