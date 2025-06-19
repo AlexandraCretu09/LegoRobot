@@ -28,7 +28,6 @@ PID::PID(atomic<bool> &stopFlag, atomic<bool> &checkerFlag,  atomic<bool> &check
 void PID::correctPath(){
 
 	WheelsMovement move(BP);
-	Sensor sensor(BP);
 	int ct = 1;
 	int ctLeft = 1, ctRight = 1;
 
@@ -36,6 +35,7 @@ void PID::correctPath(){
 
 	while(!stopFlag.load() && !checkerFlag.load() && !checkerForFrontBlock.load()) {
 		if(ct == 1) {
+			printf("called goForward\n");
 			move.goForward();
 			ct = 0;
 		}

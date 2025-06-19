@@ -61,7 +61,7 @@ MotorDetails Motor::getLeftMotorStatus(){
 
 
 void Motor::resetBothMotorEncoders(){
-	lock_guard<mutex> lock(bpMutex);
+	lock_guard<std::mutex> lock(bpMutex);
 	BP.reset_motor_encoder(PORT_A);
 	BP.reset_motor_encoder(PORT_B);
 }

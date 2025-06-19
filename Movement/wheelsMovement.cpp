@@ -19,10 +19,6 @@
 #include "../Sensors/getSensorData.h"
 
 using namespace std;
-
-//float second1 = 1000000.0;
-
-
 float second1 = 1000000.0;
 
 WheelsMovement::WheelsMovement(BrickPi3 &BP) : BP(BP) {}
